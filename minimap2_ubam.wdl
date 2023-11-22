@@ -4,7 +4,6 @@ workflow alignONTReads {
     input {
         Array[File] ubam_files
         String sample_name
-        String data_type
 
     }
 
@@ -18,7 +17,6 @@ workflow alignONTReads {
     call mergeBam {
         input:
             sample_name = sample_name,
-            data_type = data_type,
             aligned_bams = flatten(minimap2.aligned_bam)
 
     }
@@ -96,7 +94,6 @@ task mergeBam {
 
         Array[File] aligned_bams
         String sample_name
-        String data_type
 
         Int threads = 10
         Int memSizeGB = 64
@@ -119,14 +116,14 @@ task mergeBam {
         # to turn off echo do 'set +o xtrace'
         set -o xtrace
 
-        samtools merge -o "~{sample_name}.~{data_type}.GRCh38.sorted.bam" ~{sep=" " aligned_bams}
-        samtools index -@ ~{threads} "~{sample_name}.~{data_type}.GRCh38.sorted.bam"
+        samtools merge -o "~{sample_name}.ONT_GRCh38.sorted.bam" ~{sep=" " aligned_bams}
+        samtools index -@ ~{threads} "~{sample_name}_ONT.GRCh38.sorted.bam"
 
     >>>
 
     output {
-        File merged_bam = "~{sample_name}.~{data_type}.GRCh38.sorted.bam"
-        File merged_bam_idx = "~{sample_name}.~{data_type}.GRCh38.sorted.bam.bai"
+        File merged_bam = "~{sample_name}_ONT.GRCh38.sorted.bam"
+        File merged_bam_idx = "~{sample_name}_ONT.GRCh38.sorted.bam.bai"
     }
 
     runtime {
