@@ -116,7 +116,7 @@ task mergeBam {
         # to turn off echo do 'set +o xtrace'
         set -o xtrace
 
-        samtools merge -o "~{sample_name}.ONT_GRCh38.sorted.bam" ~{sep=" " aligned_bams}
+        samtools merge -o "~{sample_name}_ONT.GRCh38.sorted.bam" ~{sep=" " aligned_bams}
         samtools index -@ ~{threads} "~{sample_name}_ONT.GRCh38.sorted.bam"
 
     >>>
