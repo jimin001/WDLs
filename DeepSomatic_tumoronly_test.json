@@ -1,0 +1,14 @@
+{
+  "DeepSomatic.deepSomatic.docker_image": "google/deepsomatic:1.7.0",
+  "DeepSomatic.deepSomatic.tumor_bam": "/private/groups/patenlab/jimin/data/bams/ont_bams/CARD/HBCC_81944_FTX.haplotagged.bam",
+  "DeepSomatic.deepSomatic.tumor_bam_idx": "/private/groups/patenlab/jimin/data/bams/ont_bams/CARD/HBCC_81944_FTX.haplotagged.bam.bai",
+  "DeepSomatic.deepSomatic.sample_name_tumor": "HBCC_81944_FTX",
+  "DeepSomatic.output_prefix": "HBCC_81944_FTX_wg",
+  "DeepSomatic.deepSomatic.model_type": "ONT_TUMOR_ONLY",
+  "DeepSomatic.deepSomatic.additional_args": "--use_default_pon_filtering=true",
+  "DeepSomatic.deepSomatic.reference": "/private/groups/patenlab/jimin/data/reference/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna",
+  "DeepSomatic.deepSomatic.reference_idx": "/private/groups/patenlab/jimin/data/reference/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai",
+  "DeepSomatic.deepSomatic.memSizeGB": 128,
+  "DeepSomatic.deepSomatic.threads": 64,
+  "DeepSomatic.deepSomatic.diskSizeGB": 256
+}
