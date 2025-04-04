@@ -58,6 +58,13 @@ RUN cd /home/apps && \
 	rm -rf bwa-mem2-${BWA_MEM_VERSION}_x64-linux.tar.bz2
 ENV PATH="/home/apps/bwa-mem2-2.2.1_x64-linux:$PATH"
 
+### strelka2
+ARG STRELKA2_VERSION=2.9.10
+RUN cd /home/apps && \
+	wget https://github.com/Illumina/strelka/releases/download/v${STRELKA2_VERSION}/strelka-${STRELKA2_VERSION}.centos6_x86_64.tar.bz2  && \
+	tar -vxjf strelka-${STRELKA2_VERSION}.centos6_x86_64.tar.bz2  && \
+	rm strelka-${STRELKA2_VERSION}.centos6_x86_64.tar.bz2
+ENV PATH="/home/apps/strelka-${STRELKA2_VERSION}.centos6_x86_64:$PATH"
 
 
 

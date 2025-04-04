@@ -1,0 +1,23 @@
+{
+  "DeepSomatic.deepSomatic.reference": "File",
+  "DeepSomatic.deepSomatic.reference_idx": "File",
+  "DeepSomatic.deepSomatic.tumor_bam": "File",
+  "DeepSomatic.deepSomatic.sample_name_tumor": "String",
+  "DeepSomatic.postProcess.diskSizeGB": "Int (optional, default = 128)",
+  "DeepSomatic.deepSomatic.docker_image": "String",
+  "DeepSomatic.deepSomatic.sample_name_normal": "String",
+  "DeepSomatic.deepSomatic.memSizeGB": "Int (optional, default = 128)",
+  "DeepSomatic.postProcess.docker_image": "String (optional, default = \"jiminpark/tools:latest\")",
+  "DeepSomatic.postProcess.memSizeGB": "Int (optional, default = 4)",
+  "DeepSomatic.deepSomatic.threadCount": "Int (optional, default = 64)",
+  "DeepSomatic.deepSomatic.log_dir_path": "String",
+  "DeepSomatic.postProcess.threadCount": "Int (optional, default = 2)",
+  "DeepSomatic.deepSomatic.tumor_bam_idx": "File",
+  "DeepSomatic.deepSomatic.model_type": "String",
+  "DeepSomatic.deepSomatic.normal_bam": "File",
+  "DeepSomatic.deepSomatic.additional_args": "String",
+  "DeepSomatic.deepSomatic.diskSizeGB": "Int (optional, default = 128)",
+  "DeepSomatic.deepSomatic.normal_bam_idx": "File",
+  "DeepSomatic.output_prefix": "String"
+}
+
