@@ -37,7 +37,13 @@ task deepSomatic {
                 String model_type
 
                 # --regions=chr20
-                String additional_args
+                String? additional_args
+
+                # must be a tar.gz of FILES, not directory
+                File? model_file_tar
+
+                # example: "weights-422-0.976350.ckpt"
+                String? custom_model
 
                 Int memSizeGB = 128
                 Int threadCount = 64
