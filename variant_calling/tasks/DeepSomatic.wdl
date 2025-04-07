@@ -65,17 +65,36 @@ task deepSomatic {
                 fi
 
 
-                run_deepsomatic \
-                --model_type="~{model_type}" \
-                --ref="~{reference}" \
-                --reads_normal="~{normal_bam}" \
-                --reads_tumor="~{tumor_bam}" \
-                --output_vcf="~{output_prefix}.vcf.gz" \
-                --num_shards=~{threadCount} \
-                --logging_dir="~{log_dir_path}" \
-                --sample_name_tumor="~{sample_name_tumor}" \
-                --sample_name_normal="~{sample_name_normal}" \
-                ${ADDITIONAL_ARGS}
+                if [[ "~{model_file_tar}" == "" ]]
+                then
+                        run_deepsomatic \
+                        --model_type="~{model_type}" \
+                        --ref="~{reference}" \
+                        --reads_normal="~{normal_bam}" \
+                        --reads_tumor="~{tumor_bam}" \
+                        --output_vcf="~{output_prefix}.vcf.gz" \
+                        --num_shards=~{threadCount} \
+                        --logging_dir="~{log_dir_path}" \
+                        --sample_name_tumor="~{sample_name_tumor}" \
+                        --sample_name_normal="~{sample_name_normal}" \
+                        ${ADDITIONAL_ARGS}
+                else
+                        mkdir model
+                        tar xvf "~{model_file_tar}" --directory model --no-same-owner
+
+                        run_deepsomatic \
+                        --model_type="~{model_type}" \
+                        --ref="~{reference}" \
+                        --reads_normal="~{normal_bam}" \
+                        --reads_tumor="~{tumor_bam}" \
+                        --output_vcf="~{output_prefix}.vcf.gz" \
+                        --num_shards=~{threadCount} \
+                        --logging_dir="~{log_dir_path}" \
+                        --sample_name_tumor="~{sample_name_tumor}" \
+                        --sample_name_normal="~{sample_name_normal}" \
+                        --customized_model="model/~{custom_model}" \
+                        ${ADDITIONAL_ARGS}
+                fi
         >>>
 
         output {
