@@ -93,7 +93,6 @@ task deepSomatic {
                         MODEL_IDX=$(basename ~{model_file_idx})
 
                         ln -s ~{model_file} ./$MODEL
-                        ln -s ~{model_file_idx} ./$MODEL_ID
                         ln -s ~{model_file_idx} ./$MODEL_IDX
 
                         run_deepsomatic \
