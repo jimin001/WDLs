@@ -94,6 +94,7 @@ task deepSomatic {
 
                         ln -s ~{model_file} ./$MODEL
                         ln -s ~{model_file_idx} ./$MODEL_ID
+                        ln -s ~{model_file_idx} ./$MODEL_IDX
 
                         run_deepsomatic \
                         --model_type="~{model_type}" \
