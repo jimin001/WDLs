@@ -46,7 +46,7 @@ task deepSomatic {
                 File? model_file_idx
 
                 # example: "weights-422-0.976350.ckpt"
-                String? custom_model
+                File? custom_model
 
                 Int memSizeGB = 128
                 Int threadCount = 64
