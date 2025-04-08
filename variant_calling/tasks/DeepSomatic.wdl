@@ -46,7 +46,7 @@ task deepSomatic {
                 File? model_file_idx
 
                 # example: "weights-422-0.976350.ckpt"
-                File? custom_model
+                String? custom_model
 
                 Int memSizeGB = 128
                 Int threadCount = 64
@@ -88,6 +88,13 @@ task deepSomatic {
                         --sample_name_normal="~{sample_name_normal}" \
                         ${ADDITIONAL_ARGS}
                 else
+                        # soft link model_file and model_file_idx
+                        MODEL=$(basename ~{model_file})
+                        MODEL_IDX=$(basename ~{model_file_idx})
+
+                        ln -s ~{model_file} ./$MODEL
+                        ln -s ~{model_file_idx} ./$MODEL_ID
+
                         run_deepsomatic \
                         --model_type="~{model_type}" \
                         --ref="~{reference}" \
@@ -149,3 +156,4 @@ task postProcess {
         }
 
 }
+
