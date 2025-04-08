@@ -98,7 +98,7 @@ task deepSomatic {
                         --logging_dir="~{log_dir_path}" \
                         --sample_name_tumor="~{sample_name_tumor}" \
                         --sample_name_normal="~{sample_name_normal}" \
-                        --customized_model="model/~{custom_model}" \
+                        --customized_model="/model/~{custom_model}" \
                         ${ADDITIONAL_ARGS}
                 fi
         >>>

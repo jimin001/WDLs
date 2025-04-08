@@ -36,6 +36,8 @@ task Strelka2 {
                 File tumor_bam_idx
 
                 Int threads = 64
+
+                String docker_image = "jiminpark/aligners:strelka2"
         }
 
         command <<<
@@ -49,6 +51,7 @@ task Strelka2 {
                 # echo each line of the script to stdout so we can see what is happening
                 # to turn off echo do 'set +o xtrace'
                 set -o xtrace
+
 
                 STRELKA_INSTALL_PATH=/private/home/jpark621/software/strelka-2.9.10.centos6_x86_64/bin
                 BED=/private/groups/patenlab/jimin/data/BED/strelka2_whole_genome_regions.bed.gz
@@ -69,6 +72,10 @@ task Strelka2 {
                 File output_vcf_idx = "sstrelka_analysis_directory/results/variants/somatic.snvs.vcf.gz.tbi"
                 File indel_vcf = "strelka_analysis_directory/results/variants/somatic.indels.vcf.gz"
                 File indel_vcf_idx = "strelka_analysis_directory/results/variants/somatic.indels.vcf.gz.tbi"
+        }
+
+        runtime {
+                docker: docker_image
         }
 }
 
