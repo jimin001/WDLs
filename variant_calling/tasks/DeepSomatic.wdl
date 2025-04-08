@@ -40,7 +40,10 @@ task deepSomatic {
                 String? additional_args
 
                 # must be a tar.gz of FILES, not directory
-                File? model_file_tar
+                # File? model_file_tar
+
+                File? model_file
+                File? model_file_idx
 
                 # example: "weights-422-0.976350.ckpt"
                 String? custom_model
@@ -71,7 +74,7 @@ task deepSomatic {
                 fi
 
 
-                if [[ "~{model_file_tar}" == "" ]]
+                if [[ "~{model_file}" == "" ]]
                 then
                         run_deepsomatic \
                         --model_type="~{model_type}" \
@@ -85,9 +88,6 @@ task deepSomatic {
                         --sample_name_normal="~{sample_name_normal}" \
                         ${ADDITIONAL_ARGS}
                 else
-                        mkdir model
-                        tar xvf "~{model_file_tar}" --directory model --no-same-owner
-
                         run_deepsomatic \
                         --model_type="~{model_type}" \
                         --ref="~{reference}" \
@@ -98,7 +98,7 @@ task deepSomatic {
                         --logging_dir="~{log_dir_path}" \
                         --sample_name_tumor="~{sample_name_tumor}" \
                         --sample_name_normal="~{sample_name_normal}" \
-                        --customized_model="model/~{custom_model}" \
+                        --customized_model="~{custom_model}" \
                         ${ADDITIONAL_ARGS}
                 fi
         >>>
