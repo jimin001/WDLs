@@ -92,9 +92,11 @@ task deepSomatic {
                         # soft link model_file and model_file_idx
                         MODEL=$(basename ~{model_file})
                         MODEL_IDX=$(basename ~{model_file_idx})
+                        MODEL_EXAMPLE=$(basename ~{model_file_example})
 
                         ln -s ~{model_file} ./$MODEL
                         ln -s ~{model_file_idx} ./$MODEL_IDX
+                        ln -s ~{model_file_example} ./$MODEL_EXAMPLE
 
                         run_deepsomatic \
                         --model_type="~{model_type}" \
