@@ -47,7 +47,7 @@ task deepSomatic {
                 File? model_file_example
 
                 # example: "weights-422-0.976350.ckpt"
-                String? custom_model
+                String? custom_model = sub(split(model_file_idx, "\\.")[0], "/$", "")
 
 
                 Int memSizeGB = 128
@@ -90,9 +90,6 @@ task deepSomatic {
                         --sample_name_normal="~{sample_name_normal}" \
                         ${ADDITIONAL_ARGS}
                 else
-                        mkdir model
-                        tar xvf "~{model_file_tar}" --directory model --no-same-owner
-
                         run_deepsomatic \
                         --model_type="~{model_type}" \
                         --ref="~{reference}" \
@@ -103,7 +100,7 @@ task deepSomatic {
                         --logging_dir="~{log_dir_path}" \
                         --sample_name_tumor="~{sample_name_tumor}" \
                         --sample_name_normal="~{sample_name_normal}" \
-                        --customized_model="model/~{custom_model}"" \
+                        --customized_model=~{custom_model} \
                         ${ADDITIONAL_ARGS}
                 fi
         >>>
