@@ -90,7 +90,7 @@ task deepSomatic {
                         --sample_name_normal="~{sample_name_normal}" \
                         ${ADDITIONAL_ARGS}
                 else
-                        CUSTOM_MODEL="~{model_file_idx%.*}"
+                        CUSTOM_MODEL=$(echo ~{model_file_idx} | sed 's/\(.*\)\..*/\1/')
                         echo ${CUSTOM_MODEL}
 
                         run_deepsomatic \
