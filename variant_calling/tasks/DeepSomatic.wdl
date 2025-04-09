@@ -47,7 +47,8 @@ task deepSomatic {
                 File? model_file_example
 
                 # example: "weights-422-0.976350.ckpt"
-                String? custom_model
+                String? custom_model = basename(model_file_idx, ".index")
+
 
                 Int memSizeGB = 128
                 Int threadCount = 64
@@ -90,11 +91,11 @@ task deepSomatic {
                         ${ADDITIONAL_ARGS}
                 else
                         # soft link model_file and model_file_idx
-                        MODEL=$(basename ~{model_file})
-                        MODEL_IDX=$(basename ~{model_file_idx})
-                        MODEL_EXAMPLE=$(basename ~{model_file_example})
+                        #MODEL=$(basename ~{model_file})
+                        #MODEL_IDX=$(basename ~{model_file_idx})
+                        #MODEL_EXAMPLE=$(basename ~{model_file_example})
 
-                        CUSTOM_MODEL=$(basename ~{model_file_idx}, ".index") 
+                        #CUSTOM_MODEL=$(basename ~{model_file_idx}, ".index") 
 
                         #ln -s ~{model_file} ./$MODEL
                         #ln -s ~{model_file_idx} ./$MODEL_IDX
