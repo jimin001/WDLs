@@ -47,8 +47,7 @@ task deepSomatic {
                 File? model_file_example
 
                 # example: "weights-422-0.976350.ckpt"
-                String? model_file_idx_base = basename(model_file_idx)
-                String? custom_model = basename(model_file_idx_base, ".index")
+                String? custom_model
 
 
                 Int memSizeGB = 128
@@ -92,15 +91,16 @@ task deepSomatic {
                         ${ADDITIONAL_ARGS}
                 else
                         # soft link model_file and model_file_idx
-                        #MODEL=$(basename ~{model_file})
-                        #MODEL_IDX=$(basename ~{model_file_idx})
-                        #MODEL_EXAMPLE=$(basename ~{model_file_example})
+                        MODEL=$(basename ~{model_file})
+                        MODEL_IDX=$(basename ~{model_file_idx})
+                        MODEL_EXAMPLE=$(basename ~{model_file_example})
 
-                        #CUSTOM_MODEL=$(basename ~{model_file_idx}, ".index") 
+                        CUSTOM_MODEL=$(basename ~{model_file_idx}, ".index")
+                        echo $CUSTOM_MODEL
 
-                        #ln -s ~{model_file} ./$MODEL
-                        #ln -s ~{model_file_idx} ./$MODEL_IDX
-                        #ln -s ~{model_file_example} ./$MODEL_EXAMPLE
+                        ln -s ~{model_file} ./$MODEL
+                        ln -s ~{model_file_idx} ./$MODEL_IDX
+                        ln -s ~{model_file_example} ./$MODEL_EXAMPLE
 
                         run_deepsomatic \
                         --model_type="~{model_type}" \
@@ -112,7 +112,7 @@ task deepSomatic {
                         --logging_dir="~{log_dir_path}" \
                         --sample_name_tumor="~{sample_name_tumor}" \
                         --sample_name_normal="~{sample_name_normal}" \
-                        --customized_model=${CUSTOM_MODEL} \
+                        --customized_model=~{custom_model} \
                         ${ADDITIONAL_ARGS}
                 fi
         >>>
