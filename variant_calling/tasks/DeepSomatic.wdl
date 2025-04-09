@@ -90,7 +90,7 @@ task deepSomatic {
                         --sample_name_normal="~{sample_name_normal}" \
                         ${ADDITIONAL_ARGS}
                 else
-                        CUSTOM_MODEL= = sub(split(~{model_file_idx}, "\\.")[0], "/$", "")
+                        CUSTOM_MODEL=sub(split(~{model_file_idx}, "\\.")[0], "/$", "")
                         run_deepsomatic \
                         --model_type="~{model_type}" \
                         --ref="~{reference}" \
