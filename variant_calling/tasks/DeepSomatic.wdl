@@ -47,7 +47,8 @@ task deepSomatic {
                 File? model_file_example
 
                 # example: "weights-422-0.976350.ckpt"
-                String? custom_model = basename(model_file_idx, ".index")
+                String? model_file_idx_base = basename(model_file_idx)
+                String? custom_model = basename(model_file_idx_base, ".index")
 
 
                 Int memSizeGB = 128
