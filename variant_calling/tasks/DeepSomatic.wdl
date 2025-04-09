@@ -68,7 +68,7 @@ task deepSomatic {
                 # to turn off echo do 'set +o xtrace'
                 set -o xtrace
 
-                if [[ "~{additional_args}" == "" ]]
+                if [[ "~{additional_args}" == "None" ]]
                 then
                         ADDITIONAL_ARGS=""
                 else
