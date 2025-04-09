@@ -90,14 +90,15 @@ task deepSomatic {
                         ${ADDITIONAL_ARGS}
                 else
                         mkdir model
+                        cd model
                         # soft link model_file and model_file_idx
                         MODEL=$(basename ~{model_file})
                         MODEL_IDX=$(basename ~{model_file_idx})
                         MODEL_EXAMPLE=$(basename ~{model_file_example})
 
-                        ln -s ~{model_file} /model/$MODEL
-                        ln -s ~{model_file_idx} /model/$MODEL_IDX
-                        ln -s ~{model_file_example} /model/$MODEL_EXAMPLE
+                        ln -s ~{model_file} ./$MODEL
+                        ln -s ~{model_file_idx} ./$MODEL_IDX
+                        ln -s ~{model_file_example} ./$MODEL_EXAMPLE
 
                         run_deepsomatic \
                         --model_type="~{model_type}" \
@@ -109,7 +110,7 @@ task deepSomatic {
                         --logging_dir="~{log_dir_path}" \
                         --sample_name_tumor="~{sample_name_tumor}" \
                         --sample_name_normal="~{sample_name_normal}" \
-                        --customized_model="/model/~{custom_model}" \
+                        --customized_model="model/~{custom_model}" \
                         ${ADDITIONAL_ARGS}
                 fi
         >>>
