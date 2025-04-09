@@ -44,6 +44,7 @@ task deepSomatic {
 
                 File? model_file
                 File? model_file_idx
+                File? model_file_example
 
                 # example: "weights-422-0.976350.ckpt"
                 String? custom_model
