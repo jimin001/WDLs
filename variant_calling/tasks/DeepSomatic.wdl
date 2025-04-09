@@ -90,17 +90,8 @@ task deepSomatic {
                         --sample_name_normal="~{sample_name_normal}" \
                         ${ADDITIONAL_ARGS}
                 else
-                        # soft link model_file and model_file_idx
-                        MODEL=$(basename ~{model_file})
-                        MODEL_IDX=$(basename ~{model_file_idx})
-                        MODEL_EXAMPLE=$(basename ~{model_file_example})
-
-                        CUSTOM_MODEL=$(basename ~{model_file_idx}, ".index")
-                        echo $CUSTOM_MODEL
-
-                        ln -s ~{model_file} ./$MODEL
-                        ln -s ~{model_file_idx} ./$MODEL_IDX
-                        ln -s ~{model_file_example} ./$MODEL_EXAMPLE
+                        mkdir model
+                        tar xvf "~{model_file_tar}" --directory model --no-same-owner
 
                         run_deepsomatic \
                         --model_type="~{model_type}" \
@@ -112,7 +103,7 @@ task deepSomatic {
                         --logging_dir="~{log_dir_path}" \
                         --sample_name_tumor="~{sample_name_tumor}" \
                         --sample_name_normal="~{sample_name_normal}" \
-                        --customized_model=~{custom_model} \
+                        --customized_model="model/~{custom_model}"" \
                         ${ADDITIONAL_ARGS}
                 fi
         >>>
