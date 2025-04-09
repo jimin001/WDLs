@@ -47,7 +47,7 @@ task deepSomatic {
                 File? model_file_example
 
                 # example: "weights-422-0.976350.ckpt"
-                String? custom_model = sub(split(model_file_idx, "\\.")[0], "/$", "")
+                String? custom_model 
 
 
                 Int memSizeGB = 128
@@ -90,6 +90,7 @@ task deepSomatic {
                         --sample_name_normal="~{sample_name_normal}" \
                         ${ADDITIONAL_ARGS}
                 else
+                        CUSTOM_MODEL= = sub(split(~{model_file_idx}, "\\.")[0], "/$", "")
                         run_deepsomatic \
                         --model_type="~{model_type}" \
                         --ref="~{reference}" \
