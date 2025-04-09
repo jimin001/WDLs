@@ -90,7 +90,8 @@ task deepSomatic {
                         --sample_name_normal="~{sample_name_normal}" \
                         ${ADDITIONAL_ARGS}
                 else
-                        CUSTOM_MODEL=sub(split(~{model_file_idx}, "\\.")[0], "/$", "")
+                        CUSTOM_MODEL=$(sub(split(~{model_file_idx}, "\\.")[0], "/$", ""))
+
                         run_deepsomatic \
                         --model_type="~{model_type}" \
                         --ref="~{reference}" \
@@ -101,7 +102,7 @@ task deepSomatic {
                         --logging_dir="~{log_dir_path}" \
                         --sample_name_tumor="~{sample_name_tumor}" \
                         --sample_name_normal="~{sample_name_normal}" \
-                        --customized_model=~{custom_model} \
+                        --customized_model=${CUSTOM_MODEL} \
                         ${ADDITIONAL_ARGS}
                 fi
         >>>
