@@ -11,7 +11,7 @@ task filter_pass {
 
         String sample
 
-        String docker_image
+        String docker_image = jiminpark/deepsomatic_postprocess
         Int threads = 1
         Int memSizeGB = 128
         Int diskSizeGB = 128
@@ -61,7 +61,7 @@ task filter_out_germline_variants {
 
         String sample
 
-        String docker_image
+        String docker_image = jiminpark/deepsomatic_postprocess
         Int threads = 1
         Int memSizeGB = 128
         Int diskSizeGB = 128
@@ -103,7 +103,7 @@ task filter_GQ_and_DP {
 
         String sample
 
-        String docker_image
+        String docker_image = jiminpark/deepsomatic_postprocess
         Int threads = 1
         Int memSizeGB = 128
         Int diskSizeGB = 128
@@ -135,7 +135,7 @@ task subtract_segdup_regions {
 
         String sample
 
-        String docker_image
+        String docker_image = jiminpark/deepsomatic_postprocess
         Int threads = 1
         Int memSizeGB = 128
         Int diskSizeGB = 128
@@ -165,6 +165,7 @@ task tag_haplotype {
         File deepsomatic_only_GQ20_DP10_segdup_VCF
         File deepsomatic_only_GQ20_DP10_segdup_IDX
         File BAM
+        File BAI
         
         String sample
 
@@ -207,7 +208,7 @@ task tag_gnomad {
     }
 
     command <<<
-        java -jar SnpSift.jar annotate -noId -v /opt/scripts/gnomad.genomes.r4.0.sites.small.vcf.bgz \
+        java -jar SnpSift.jar annotate -noId -v /opt/scripts/gnomad.genomes.v4.1.sites.small.vcf.bgz \
         ~{deepsomatic_only_GQ20_DP10_segdup_tagAH_VCF} | bgzip > ~{sample}_deepsomatic_only_GQ20_DP10_segdup_tagAH_gnomad.vcf.gz
 
         bcftools view -i 'INFO/AF<0.001 | INFO/AF="."' ~{sample}_deepsomatic_only_GQ20_DP10_segdup_tagAH_gnomad.vcf.gz \
