@@ -5,7 +5,6 @@ import "../tasks/DeepSomatic_tumoronly_postfiltering.wdl" as filter
 workflow DeepSomatic_filtering {
     input {
         File germline_VCF
-        File germline_IDX
 
         File somatic_VCF
         File somatic_IDX
@@ -19,7 +18,6 @@ workflow DeepSomatic_filtering {
     call filter.filter_pass as filter_pass {
         input: 
             germline_VCF = germline_VCF,
-            germline_IDX = germline_IDX,
             somatic_VCF = somatic_VCF,
             somatic_IDX = somatic_IDX,
             sample = sample

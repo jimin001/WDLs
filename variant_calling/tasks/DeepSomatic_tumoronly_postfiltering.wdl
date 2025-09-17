@@ -5,7 +5,6 @@ version 1.0
 task filter_pass {
     input {
         File germline_VCF
-        File germline_IDX
         File somatic_VCF
         File somatic_IDX
 
@@ -28,6 +27,8 @@ task filter_pass {
         # echo each line of the script to stdout so we can see what is happening
         # to turn off echo do 'set +o xtrace'
         set -o xtrace
+
+        bcftools index -t ~{germline_VCF}
 
         bcftools filter -i 'FILTER="PASS"' ~{germline_VCF} | bgzip > ~{sample}_deepvariant_pass_only.vcf.gz
         bcftools filter -i 'FILTER="PASS"' ~{somatic_VCF} | bgzip > ~{sample}_deepsomatic_pass_only.vcf.gz
