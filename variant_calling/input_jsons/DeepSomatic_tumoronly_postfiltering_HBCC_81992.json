@@ -1,0 +1,9 @@
+{
+  "bam": "/private/groups/patenlab/jimin/data/bams/ont_bams/CARD/HBCC_81944_FTX.haplotagged.bam",
+  "bai": "/private/groups/patenlab/jimin/data/bams/ont_bams/CARD/HBCC_81944_FTX.haplotagged.bam.bai",
+  "germline_VCF": "/private/groups/patenlab/jimin/data/VCF/HBCC_CARD/deepvariant/HBCC_81992_FTX.phased.vcf.gz",
+  "germline_IDX": "/private/groups/patenlab/jimin/data/VCF/HBCC_CARD/deepvariant/HBCC_81992_FTX.phased.vcf.gz.tbi",
+  "somatic_VCF": "/private/groups/patenlab/jimin/data/VCF/HBCC_CARD/HBCC_81992_FTX/HBCC_81992_FTX_wg_tumor-only.vcf.gz",
+  "somatic_IDX": "/private/groups/patenlab/jimin/data/VCF/HBCC_CARD/HBCC_81992_FTX/HBCC_81992_FTX_wg_tumor-only.vcf.gz.tbi",
+  "sample": "HBCC_81992_FTX"
+}
