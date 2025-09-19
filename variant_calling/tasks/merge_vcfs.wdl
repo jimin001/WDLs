@@ -4,8 +4,8 @@ version 1.0
 task merge_vcfs {
         input {
                 Array[File] vcf_files
-                Int memSizeGb = 64   # this can probably be reduced again..
-                Int diskSizeGb = 5 * round(size(vcfFiles, 'G')) + 500
+                Int memSizeGB = 64   # this can probably be reduced again..
+                Int diskSizeGB = 5 * round(size(vcf_files, 'G')) + 500
                 String output_prefix
                 String docker_image = "jiminpark/deepsomatic_postprocess"
         }
@@ -30,7 +30,7 @@ task merge_vcfs {
 
         runtime {
                 docker: docker_image
-                cpu: threads
+                cpu: 1
                 memory: memSizeGB + " GB"
                 disks: "local-disk " + diskSizeGB + " SSD"
         }
