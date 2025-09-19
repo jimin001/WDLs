@@ -1,5 +1,7 @@
 version 1.0
 import "merge_vcfs.wdl" as merge_vcfs
+import "DeepSomatic_tumoronly_postfiltering.wdl" as filter
+
 
 workflow DeepSomatic {
         input{
@@ -92,6 +94,7 @@ task deepSomatic {
         }
 
         runtime {
+                preemtiple: 2
                 docker: docker_image
                 cpu: threads
                 memory: memSizeGB + " GB"
