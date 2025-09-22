@@ -52,8 +52,8 @@ task deepSomatic {
 
                 String docker_image
                 Int threads
-                Int memSizeGB = 128
-                Int diskSizeGB = 256
+                Int memSizeGB = 64
+                Int diskSizeGB = 128 # tried reducing
         }
 
         command <<<

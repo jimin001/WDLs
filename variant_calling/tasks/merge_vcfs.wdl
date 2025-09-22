@@ -20,7 +20,7 @@ task merge_vcfs {
 
                 # vcf merging
                 bcftools concat -n ~{sep=" " vcf_files} | bcftools sort -T bcftools.tmp -O z -o ~{output_prefix}_merged.vcf.gz -
-                bcftools index -t ~{output_prefix}_merged.vcf.gz.vcf.gz
+                bcftools index -t ~{output_prefix}_merged.vcf.gz
         >>>
 
         output {
