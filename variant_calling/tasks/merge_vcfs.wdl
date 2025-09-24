@@ -24,8 +24,8 @@ task merge_vcfs {
         >>>
 
         output {
-                File merged_vcf = "~{output_prefix}_merged.vcf.gz.vcf.gz"
-                File merged_vcf_idx = "~{output_prefix}_merged.vcf.gz.vcf.gz.tbi"
+                File merged_vcf = "~{output_prefix}_merged.vcf.gz"
+                File merged_vcf_idx = "~{output_prefix}_merged.vcf.gz.tbi"
         }
 
         runtime {
