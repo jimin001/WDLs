@@ -224,7 +224,7 @@ task tag_gnomad {
         String docker_image = "jiminpark/snpeff"
         Int threads = 1
         Int memSizeGB = 4
-        Int diskSizeGB = 64
+        Int diskSizeGB = 128
     }
 
     command <<<
