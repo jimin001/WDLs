@@ -35,6 +35,9 @@ task deepSomatic {
                 # to turn off echo do 'set +o xtrace'
                 set -o xtrace
 
+                ln -s ~{tumor_bam} tumor.bam
+                ln -s ~{tumor_bam_idx} tumor.bam.bai
+
                 if [[ "~{additional_args}" == "" ]]
                 then
                         ADDITIONAL_ARGS=""
@@ -47,7 +50,7 @@ task deepSomatic {
                 run_deepsomatic \
                 --model_type="~{model_type}" \
                 --ref="~{reference}" \
-                --reads_tumor="~{tumor_bam}" \
+                --reads_tumor=tumor.bam \
                 --output_vcf="~{output_prefix}_tumor-only.vcf.gz" \
                 --num_shards="~{threads}" \
                 --logging_dir="log_outputs" \

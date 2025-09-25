@@ -97,7 +97,7 @@ task deepSomatic {
         }
 
         runtime {
-                preemtiple: 2
+                preemptible: 2
                 docker: docker_image
                 cpu: threads
                 memory: memSizeGB + " GB"
