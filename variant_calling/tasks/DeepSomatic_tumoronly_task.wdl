@@ -1,37 +1,4 @@
 version 1.0
-import "merge_vcfs.wdl" as merge_vcfs
-import "DeepSomatic_tumoronly_postfiltering.wdl" as filter
-
-
-workflow DeepSomatic {
-        input{
-            Array[File] bam_files
-            Array[File] bam_files_idx
-            String output_prefix
-        }
-
-        scatter (bam_file in zip(bam_files, bam_files_idx)) {
-            call deepSomatic {
-                input:
-                        tumor_bam = bam_file.left,
-                        tumor_bam_idx = bam_file.right,
-                        output_prefix = output_prefix
-            }
-        }
-
-        call merge_vcfs.merge_vcfs as merge_vcfs {
-                input:
-                        vcf_files = deepSomatic.output_vcf,
-                        output_prefix = output_prefix
-        }        
-
-        output {
-            File DeepSomaticVCF = merge_vcfs.merged_vcf
-            File DeepSomaticVCFIndex = merge_vcfs.merged_vcf_idx
-        }
-}
-
-################### tasks #####################
 
 task deepSomatic {
         input {
@@ -68,9 +35,6 @@ task deepSomatic {
                 # to turn off echo do 'set +o xtrace'
                 set -o xtrace
 
-                ln -s ~{tumor_bam} tumor.bam
-                ln -s ~{tumor_bam_idx} tumor.bam.bai
-
                 if [[ "~{additional_args}" == "" ]]
                 then
                         ADDITIONAL_ARGS=""
@@ -83,7 +47,7 @@ task deepSomatic {
                 run_deepsomatic \
                 --model_type="~{model_type}" \
                 --ref="~{reference}" \
-                --reads_tumor=tumor.bam \
+                --reads_tumor="~{tumor_bam}" \
                 --output_vcf="~{output_prefix}_tumor-only.vcf.gz" \
                 --num_shards="~{threads}" \
                 --logging_dir="log_outputs" \
@@ -97,11 +61,10 @@ task deepSomatic {
         }
 
         runtime {
-                preemtiple: 2
+                preemptible: 2
                 docker: docker_image
                 cpu: threads
                 memory: memSizeGB + " GB"
                 disks: "local-disk " + diskSizeGB + " SSD"
         }
 }
-
