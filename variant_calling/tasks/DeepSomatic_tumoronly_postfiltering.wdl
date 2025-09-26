@@ -188,7 +188,7 @@ task tag_haplotype {
         String docker_image = "jiminpark/deepsomatic_postprocess"
         Int threads = 1
         Int memSizeGB = 4
-        Int diskSizeGB = 128
+        Int diskSizeGB = round(size(BAM, 'G')) + 100
     }
 
     command <<<
@@ -224,7 +224,7 @@ task tag_gnomad {
         String docker_image = "jiminpark/snpeff"
         Int threads = 1
         Int memSizeGB = 4
-        Int diskSizeGB = 128
+        Int diskSizeGB = 64
     }
 
     command <<<
