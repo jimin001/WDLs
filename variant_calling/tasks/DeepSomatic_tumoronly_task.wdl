@@ -20,7 +20,7 @@ task deepSomatic {
                 String docker_image
                 Int threads
                 Int memSizeGB = 128
-                Int diskSizeGB = 128 # tried reducing
+                Int diskSizeGB = 5 * round(size(tumor_bam, 'G')) + 50
         }
 
         command <<<
