@@ -22,7 +22,7 @@ workflow DeepSomatic_tumoronly_split_bams_full {
         call deepsomatic.split_bams as split_bams {
             input:
                     bam = bam,
-                    bai = if defined(bai) then bai else "",
+                    bai = bai,
                     region = region,
                     sample = sample
         }
