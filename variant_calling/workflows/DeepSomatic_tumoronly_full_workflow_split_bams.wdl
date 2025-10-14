@@ -8,7 +8,7 @@ import "../tasks/DeepSomatic_tumoronly_task.wdl" as deepsomatic
 workflow DeepSomatic_tumoronly_split_bams_full {
     input {
         File bam
-        File bai
+        File? bai
 
         Array[String] regions
 
@@ -22,7 +22,7 @@ workflow DeepSomatic_tumoronly_split_bams_full {
         call deepsomatic.split_bams as split_bams {
             input:
                     bam = bam,
-                    bai = bai,
+                    bai = if defined(bai) then bai else "",
                     region = region,
                     sample = sample
         }
@@ -78,7 +78,7 @@ workflow DeepSomatic_tumoronly_split_bams_full {
             deepsomatic_only_GQ20_DP10_segdup_VCF = subtract_segdup_regions.deepsomatic_only_GQ20_DP10_segdup_vcf,
             deepsomatic_only_GQ20_DP10_segdup_IDX = subtract_segdup_regions.deepsomatic_only_GQ20_DP10_segdup_idx,
             BAM = bam,
-            BAI = bai,
+            BAI = select_first([bai, split_bams.full_bam_idx[0]]),
             sample = sample
     }
 

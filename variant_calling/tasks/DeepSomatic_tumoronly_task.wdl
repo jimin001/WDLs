@@ -75,7 +75,8 @@ task deepSomatic {
 task split_bams {
         input {
                 File bam
-                File bai
+                File? bai
+                String prefix = basename(bam)
 
                 String region
 
@@ -88,11 +89,19 @@ task split_bams {
         }
 
         command <<<
+                if [[ "~{bai}" == "" ]]
+                then
+                        samtools index -@ ~{threads} ~{bam}
+                else
+                        continue
+                fi
+
                 samtools view -bh -@ ~{threads} ~{bam} ~{region} > ~{sample}_~{region}.bam
                 samtools index -@ ~{threads} ~{sample}_~{region}.bam
         >>>
 
         output {
+                File full_bam_idx = "~{prefix}.bai"
                 File region_bam = "~{sample}_~{region}.bam"
                 File region_bai = "~{sample}_~{region}.bam.bai"
         }
