@@ -71,3 +71,37 @@ task deepSomatic {
                 disks: "local-disk " + diskSizeGB + " SSD"
         }
 }
+
+task split_bams {
+        input {
+                File bam
+                File bai
+
+                String region
+
+                String sample
+
+                String docker_image = "jiminpark/deepsomatic_postprocess"
+                Int threads
+                Int memSizeGB = 128
+                Int diskSizeGB = 2 * round(size(bam, 'G')) + 50
+        }
+
+        command <<<
+                samtools view -bh -@ ~{threads} ~{bam} ~{region} > ~{sample}_~{region}.bam
+                samtools index -@ ~{threads} ~{sample}_~{region}.bam
+        >>>
+
+        output {
+                File region_bam = "~{sample}_~{region}.bam"
+                File region_bai = "~{sample}_~{region}.bam.bai"
+        }
+
+        runtime {
+                preemptible: 2
+                docker: docker_image
+                cpu: threads
+                memory: memSizeGB + " GB"
+                disks: "local-disk " + diskSizeGB + " SSD"
+        }
+}
