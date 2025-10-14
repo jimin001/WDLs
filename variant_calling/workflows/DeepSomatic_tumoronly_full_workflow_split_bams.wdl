@@ -78,7 +78,7 @@ workflow DeepSomatic_tumoronly_split_bams_full {
             deepsomatic_only_GQ20_DP10_segdup_VCF = subtract_segdup_regions.deepsomatic_only_GQ20_DP10_segdup_vcf,
             deepsomatic_only_GQ20_DP10_segdup_IDX = subtract_segdup_regions.deepsomatic_only_GQ20_DP10_segdup_idx,
             BAM = bam,
-            BAI = select_first([bai, split_bams.full_bam_idx[0]]),
+            BAI = bai,
             sample = sample
     }
 

@@ -101,7 +101,6 @@ task split_bams {
         >>>
 
         output {
-                File full_bam_idx = "~{prefix}.bai"
                 File region_bam = "~{sample}_~{region}.bam"
                 File region_bai = "~{sample}_~{region}.bam.bai"
         }

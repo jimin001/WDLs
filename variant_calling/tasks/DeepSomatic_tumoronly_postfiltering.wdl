@@ -181,17 +181,24 @@ task tag_haplotype {
         File deepsomatic_only_GQ20_DP10_segdup_VCF
         File deepsomatic_only_GQ20_DP10_segdup_IDX
         File BAM
-        File BAI
+        File? BAI
         
         String sample
 
         String docker_image = "jiminpark/deepsomatic_postprocess"
-        Int threads = 1
+        Int threads = 4
         Int memSizeGB = 4
         Int diskSizeGB = round(size(BAM, 'G')) + 100
     }
 
     command <<<
+        if [[ "~{BAI}" == "" ]]
+        then
+                samtools index -@ ~{threads} ~{BAM}
+        else
+                continue
+        fi
+
         # echo each line of the script to stdout so we can see what is happening
         # to turn off echo do 'set +o xtrace'
         set -o xtrace
