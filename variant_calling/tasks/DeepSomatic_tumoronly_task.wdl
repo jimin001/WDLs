@@ -76,11 +76,9 @@ task split_bams {
         input {
                 File bam
                 File? bai
-                String prefix = basename(bam)
+                String sample
 
                 String region
-
-                String sample
 
                 String docker_image = "jiminpark/deepsomatic_postprocess"
                 Int threads
