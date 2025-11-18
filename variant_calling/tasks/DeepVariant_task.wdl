@@ -51,7 +51,7 @@ task deepVariant {
                 --model_type="~{model_type}" \
                 --ref="~{reference}" \
                 --reads=tumor.bam \
-                --output_vcf="~{output_prefix}_tumor-only.vcf.gz" \
+                --output_vcf="~{output_prefix}_deepvariant.vcf.gz" \
                 --num_shards="~{threads}" \
                 --logging_dir="log_outputs" \
                 ${ADDITIONAL_ARGS}
