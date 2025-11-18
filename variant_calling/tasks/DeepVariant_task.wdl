@@ -19,7 +19,7 @@ task deepVariant {
 
                 String docker_image
                 Int threads
-                Int memSizeGB = 128
+                Int memSizeGB = 256
                 Int diskSizeGB = 5 * round(size(tumor_bam, 'G')) + 50
         }
 
