@@ -53,6 +53,50 @@ task filter_pass {
     }
 }
 
+task filter_pass_germline {
+    input {
+        File germline_VCF
+
+        String sample
+
+        String docker_image = "jiminpark/deepsomatic_postprocess"
+        Int threads = 1
+        Int memSizeGB = 4
+        Int diskSizeGB = 64
+    }
+
+    command <<<
+        # Set the exit code of a pipeline to that of the rightmost command
+        # to exit with a non-zero status, or zero if all commands of the pipeline exit
+        set -o pipefail
+        # cause a bash script to exit immediately when a command fails
+        set -e
+        # cause the bash shell to treat unset variables as an error and exit immediately
+        set -u
+        # echo each line of the script to stdout so we can see what is happening
+        # to turn off echo do 'set +o xtrace'
+        set -o xtrace
+
+        bcftools index -t ~{germline_VCF}
+
+        bcftools filter -i 'FILTER="PASS"' ~{germline_VCF} | bgzip > ~{sample}_deepvariant_pass_only.vcf.gz
+
+        bcftools index -t ~{sample}_deepvariant_pass_only.vcf.gz
+    >>>
+
+    output {
+        File germline_pass_only_vcf = "~{sample}_deepvariant_pass_only.vcf.gz"
+        File germline_pass_only_vcf_idx = "~{sample}_deepvariant_pass_only.vcf.gz.tbi"        
+    }
+
+    runtime {
+        docker: docker_image
+        cpu: threads
+        memory: memSizeGB + " GB"
+        disks: "local-disk " + diskSizeGB + " SSD"
+    }
+}
+
 task filter_out_germline_variants {
     input {
         File germline_VCF_pass_only
