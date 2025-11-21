@@ -14,8 +14,8 @@ workflow DeepSomatic_tumoronly_split_bams_full {
 
         File germline_vcf
 
-        String output_prefix = basename(bam, ".bam")
-        String sample = basename(bam, ".bam")
+        String output_prefix
+        String sample
     }
 
     scatter (region in regions) {

@@ -247,7 +247,7 @@ task tag_haplotype {
         # to turn off echo do 'set +o xtrace'
         set -o xtrace
 
-        python3 /opt/scripts/haplotypeonly_somatic_vcf.py -v ~{deepsomatic_only_GQ20_DP10_segdup_VCF} -bam ~{BAM} -o ~{sample}_deepsomatic_only_GQ20_DP10_segdup_tagAH.vcf -u 10
+        python3 /opt/scripts/haplotype_fraction.py -v ~{deepsomatic_only_GQ20_DP10_segdup_VCF} -bam ~{BAM} -o ~{sample}_deepsomatic_only_GQ20_DP10_segdup_tagAH.vcf -u 10
         bgzip ~{sample}_deepsomatic_only_GQ20_DP10_segdup_tagAH.vcf
         bcftools index -t ~{sample}_deepsomatic_only_GQ20_DP10_segdup_tagAH.vcf.gz
     >>>
