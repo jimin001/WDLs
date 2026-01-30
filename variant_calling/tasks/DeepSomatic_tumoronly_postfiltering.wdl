@@ -265,6 +265,54 @@ task tag_haplotype {
     }
 }
 
+task tag_haplotype_with_quality_filtering {
+    input {
+        File germline_VCF_pass_only
+        File germline_IDX_pass_only
+        File deepsomatic_only_GQ20_DP10_segdup_VCF
+        File deepsomatic_only_GQ20_DP10_segdup_IDX
+        File BAM
+        File? BAI
+
+        Int agreeing_gv_threshold
+        Int disagreeing_gv_threshold
+        
+        String sample
+
+        String docker_image = "jiminpark/deepsomatic_postprocess:v2"
+        Int threads = 20
+        Int memSizeGB = 4
+        Int diskSizeGB = round(size(BAM, 'G')) * 2
+        # may need more disk than before..
+    }
+
+    command <<<
+        if [[ "~{BAI}" == "" ]]
+        then
+                samtools index -@ ~{threads} ~{BAM}
+        fi
+
+        # echo each line of the script to stdout so we can see what is happening
+        # to turn off echo do 'set +o xtrace'
+        set -o xtrace
+
+        python3 /opt/scripts/tag_haplotype_exclusive_multiprocessing.py -bam ~{BAM} -v ~{deepsomatic_only_GQ20_DP10_segdup_VCF} -g ~{germline_VCF_pass_only} -d "output_files" -o "output_files/~{sample}_deepsomatic_only_GQ20_DP10_segdup_tagAH.vcf.gz" -k ~{agreeing_gv_threshold} -m ~{disagreeing_gv_threshold} --max_workers ~{threads}
+    >>>
+
+    output {
+        File deepsomatic_only_GQ20_DP10_segdup_tagAH_vcf = "output_files/~{sample}_deepsomatic_only_GQ20_DP10_segdup_tagAH.vcf.gz"
+        File deepsomatic_only_GQ20_DP10_segdup_tagAH_idx = "output_files/~{sample}_deepsomatic_only_GQ20_DP10_segdup_tagAH.vcf.gz.tbi"
+    }
+
+    runtime {
+        docker: docker_image
+        cpu: threads
+        memory: memSizeGB + " GB"
+        disks: "local-disk " + diskSizeGB + " SSD"
+    }
+}
+
+
 task tag_gnomad {
     input {
         File deepsomatic_only_GQ20_DP10_segdup_tagAH_VCF
