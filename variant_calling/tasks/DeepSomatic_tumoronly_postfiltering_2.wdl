@@ -285,6 +285,13 @@ task filter_high_vaf {
         File output_vcf = "~{vcf_base}_VAF0.8.vcf.gz"
         File output_vcf_idx = "~{vcf_base}_VAF0.8.vcf.gz.tbi"
     }
+
+    runtime {
+        docker: docker_image
+        cpu: threads
+        memory: memSizeGB + " GB"
+        disks: "local-disk " + diskSizeGB + " SSD"
+    }
 }
 
 
