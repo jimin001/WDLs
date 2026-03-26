@@ -400,7 +400,7 @@ task tag_HQ {
         Int agreeing_gv_threshold = 5
         Int disagreeing_gv_threshold = 0
         Int unphased_threshold = 10
-        String chromosome
+        String? chromosome
 
         String vcf_base = basename(somatic_VCF_input, ".vcf.gz")
         
