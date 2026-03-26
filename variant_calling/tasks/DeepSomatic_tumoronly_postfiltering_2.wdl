@@ -144,6 +144,54 @@ task tag_gnomad {
         disks: "local-disk " + diskSizeGB + " SSD"
     }
 }
+
+task tag_gnomad_filter_all {
+    input {
+        File somatic_VCF_input
+        File somatic_IDX_input
+
+        String sample
+        String vcf_base = basename(somatic_VCF_input, ".vcf.gz")
+
+        String docker_image = "jiminpark/snpeff"
+        Int threads = 1
+        Int memSizeGB = 16
+        Int diskSizeGB = 64
+    }
+
+    command <<<
+        # echo each line of the script to stdout so we can see what is happening
+        # to turn off echo do 'set +o xtrace'
+        set -o xtrace
+
+
+        java -jar /home/apps/snpEff/SnpSift.jar Annotate -noId /opt/scripts/gnomad.genomes.v4.1.sites.small.vcf.bgz \
+        ~{somatic_VCF_input} | bgzip > ~{vcf_base}_gnomad.vcf.gz
+
+        bcftools index -t ~{vcf_base}_gnomad.vcf.gz
+
+        # keep all variant entries w/o gnomad tag
+        bcftools view -i 'INFO/AF="."' ~{vcf_base}_gnomad.vcf.gz | bgzip  > ~{vcf_base}_gnomadfilterall.vcf.gz
+
+        bcftools index -t  ~{vcf_base}_gnomadfilterall.vcf.gz
+
+    >>>
+
+    output {
+        File gnomad_VCF = "~{vcf_base}_gnomad.vcf.gz"
+        File gnomad_IDX = "~{vcf_base}_gnomad.vcf.gz.tbi"
+        File gnomad_filter_VCF = "~{vcf_base}_gnomadfilterall.vcf.gz"
+        File gnomad_filter_IDX = "~{vcf_base}_gnomadfilterall.vcf.gz.tbi"
+    }
+
+    runtime {
+        docker: docker_image
+        cpu: threads
+        memory: memSizeGB + " GB"
+        disks: "local-disk " + diskSizeGB + " SSD"
+    }
+}
+
 task filter_pass_germline {
     input {
         File germline_VCF
@@ -278,7 +326,7 @@ task filter_high_vaf {
     command <<<
         set -o xtrace
         bcftools view -i 'FMT/VAF<=0.8' ~{somatic_VCF_input} | bgzip > ~{vcf_base}_VAF0.8.vcf.gz
-        bcftools index -t  ~{vcf_base}_VAF0.8.vcf.gz
+        bcftools index -t ~{vcf_base}_VAF0.8.vcf.gz
     >>>
 
     output {
@@ -294,93 +342,105 @@ task filter_high_vaf {
     }
 }
 
-
-
-task tag_haplotype {
+task intersect_dv_and_gnomad {
     input {
+        File germline_VCF
+        File germline_IDX
+
+        String sample
+        String docker_image = "jiminpark/deepsomatic_postprocess:v3"
+
+        Int threads = 1
+        Int memSizeGB = 4
+        Int diskSizeGB = 64
+    }
+
+    command <<<
+        # echo each line of the script to stdout so we can see what is happening
+        # to turn off echo do 'set +o xtrace'
+        set -o xtrace
+
+        mkdir bcftools_isec_temp
+        bcftools isec -p bcftools_isec_temp ~{germline_VCF} /opt/scripts/gnomad.genomes.v4.1.sites.small.AF0.01.vcf.bgz
+        cd bcftools_isec_temp
+
+        mv 0002.vcf ~{sample}_dv_intersect_gnomad_0_01.vcf
+        bgzip ~{sample}_dv_intersect_gnomad_0_01.vcf
+        bcftools index -t ~{sample}_dv_intersect_gnomad_0_01.vcf.gz
+
+        mv ~{sample}_dv_intersect_gnomad_0_01.vcf.gz ../
+        mv ~{sample}_dv_intersect_gnomad_0_01.vcf.gz.tbi ../
+
+    >>>
+
+    output {
+        File output_vcf = "~{sample}_dv_intersect_gnomad_0_01.vcf.gz"
+        File output_vcf_idx = "~{sample}_dv_intersect_gnomad_0_01.vcf.gz.tbi"
+    }
+
+    runtime {
+        docker: docker_image
+        cpu: threads
+        memory: memSizeGB + " GB"
+        disks: "local-disk " + diskSizeGB + " SSD"
+    }
+}
+
+
+task tag_HQ {
+    input {
+        File bam
+        File bai
+
+        File germline_dv_intersect_gnomad
+        File germline_dv_intersect_gnomad_idx
         File somatic_VCF_input
         File somatic_IDX_input
-        File BAM
-        File? BAI
-        
-        String sample
-        String vcf_base = basename(somatic_VCF_input, ".vcf.gz")
 
-        String docker_image = "jiminpark/deepsomatic_postprocess"
+        Int agreeing_gv_threshold = 5
+        Int disagreeing_gv_threshold = 0
+        Int unphased_threshold = 10
+        String chromosome
+
+        String vcf_base = basename(somatic_VCF_input, ".vcf.gz")
+        
+        String docker_image = "jiminpark/deepsomatic_postprocess:v3"
         Int threads = 4
         Int memSizeGB = 4
-        Int diskSizeGB = round(size(BAM, 'G')) + 100
+        Int diskSizeGB = round(size(bam, 'G')) * 2
     }
 
     command <<<
-        if [[ "~{BAI}" == "" ]]
+        # echo each line of the script to stdout so we can see what is happening
+        # to turn off echo do 'set +o xtrace'
+        set -o xtrace
+
+        if [[ "~{chromosome}" == "" ]]
         then
-                samtools index -@ ~{threads} ~{BAM}
+                CHROMOSOME=""
         else
-                continue
+                CHROMOSOME="-c ~{chromosome}"
         fi
-
-        # echo each line of the script to stdout so we can see what is happening
-        # to turn off echo do 'set +o xtrace'
-        set -o xtrace
-
-        python3 /opt/scripts/haplotype_fraction.py -v ~{somatic_VCF_input} -bam ~{BAM} -o ~{vcf_base}_tagAH.vcf -u 10
-        bgzip ~{vcf_base}_tagAH.vcf
-        bcftools index -t ~{vcf_base}_tagAH.vcf.gz
-    >>>
-
-    output {
-        File output_vcf = "~{vcf_base}_tagAH.vcf.gz"
-        File output_vcf_idx = "~{vcf_base}_tagAH.vcf.gz.tbi"
-    }
-
-    runtime {
-        docker: docker_image
-        cpu: threads
-        memory: memSizeGB + " GB"
-        disks: "local-disk " + diskSizeGB + " SSD"
-    }
-}
-
-task tag_haplotype_with_quality_filtering {
-    input {
-        File germline_VCF_input
-        File germline_IDX_input
-        File somatic_VCF_input
-        File somatic_IDX_input
-        File BAM
-        File? BAI
-
-        Int agreeing_gv_threshold
-        Int disagreeing_gv_threshold
         
-        String sample
-        String vcf_base = basename(somatic_VCF_input, ".vcf.gz")
+        mkdir -p "output_files"
 
+        python3 /opt/scripts/tag_haplotag_exclusive_multiprocessing_v3.py \
+        -bam ~{bam} \
+        -v ~{somatic_VCF_input} \
+        -g ~{germline_dv_intersect_gnomad} \
+        -d "output_files" \
+        -o "output_files/output_merged.vcf.gz" \
+        -k ~{agreeing_gv_threshold} \
+        -m ~{disagreeing_gv_threshold} \
+        --max_workers ~{threads} \
+        ${CHROMOSOME}
 
-        String docker_image = "jiminpark/deepsomatic_postprocess:v2"
-        Int threads = 20
-        Int memSizeGB = 4
-        Int diskSizeGB = round(size(BAM, 'G')) * 2
-        # may need more disk than before..
-    }
-
-    command <<<
-        if [[ "~{BAI}" == "" ]]
-        then
-                samtools index -@ ~{threads} ~{BAM}
-        fi
-
-        # echo each line of the script to stdout so we can see what is happening
-        # to turn off echo do 'set +o xtrace'
-        set -o xtrace
-
-        python3 /opt/scripts/tag_haplotype_exclusive_multiprocessing.py -bam ~{BAM} -v ~{somatic_VCF_input} -g ~{germline_VCF_input} -d "output_files" -o "output_files/~{vcf_base}_tagAH.vcf.gz" -k ~{agreeing_gv_threshold} -m ~{disagreeing_gv_threshold} --max_workers ~{threads}
     >>>
 
     output {
-        File output_vcf = "output_files/~{vcf_base}_tagAH.vcf.gz"
-        File output_vcf_idx = "output_files/~{vcf_base}_tagAH.vcf.gz.tbi"
+        File output_vcf = "output_files/sorted_output_merged.vcf.gz"
+        File output_vcf_idx = "output_files/sorted_output_merged.vcf.gz.tbi"
+
     }
 
     runtime {
@@ -390,3 +450,4 @@ task tag_haplotype_with_quality_filtering {
         disks: "local-disk " + diskSizeGB + " SSD"
     }
 }
+
