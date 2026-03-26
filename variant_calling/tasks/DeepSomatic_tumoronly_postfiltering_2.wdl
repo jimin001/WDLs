@@ -407,7 +407,7 @@ task tag_HQ {
         String docker_image = "jiminpark/deepsomatic_postprocess:v3"
         Int threads = 4
         Int memSizeGB = 4
-        Int diskSizeGB = round(size(bam, 'G')) * 2
+        Int diskSizeGB = round(size(bam, 'G')) * 4
     }
 
     command <<<
