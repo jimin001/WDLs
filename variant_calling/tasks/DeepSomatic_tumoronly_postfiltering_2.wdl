@@ -347,6 +347,9 @@ task intersect_dv_and_gnomad {
         File germline_VCF
         File germline_IDX
 
+        File gnomad_VCF
+        File gnomad_IDX
+
         String sample
         String docker_image = "jiminpark/deepsomatic_postprocess:v3"
 
@@ -361,7 +364,7 @@ task intersect_dv_and_gnomad {
         set -o xtrace
 
         mkdir bcftools_isec_temp
-        bcftools isec -p bcftools_isec_temp ~{germline_VCF} /opt/scripts/gnomad.genomes.v4.1.sites.small.AF0.01.vcf.bgz
+        bcftools isec -p bcftools_isec_temp ~{germline_VCF} ~{gnomad_VCF}
         cd bcftools_isec_temp
 
         mv 0002.vcf ~{sample}_dv_intersect_gnomad_0_01.vcf
@@ -387,6 +390,40 @@ task intersect_dv_and_gnomad {
 }
 
 
+task extract_snps_from_harmphase {
+    input {
+        File harmphase_VCF
+        File harmphase_IDX
+
+        String sample
+        String vcf_base = basename(harmphase_VCF, ".vcf.gz")
+
+        String docker_image = "jiminpark/deepsomatic_postprocess"
+        Int threads = 1
+        Int memSizeGB = 4
+        Int diskSizeGB = 64
+    }
+
+    command <<<
+        set -o xtrace
+
+        bcftools norm -m -any ~{harmphase_VCF} | bcftools view -v snps | bgzip > ~{vcf_base}_snps.vcf.gz
+        bcftools index -t ~{vcf_base}_snps.vcf.gz
+    >>>
+
+    output {
+        File output_vcf = "~{vcf_base}_snps.vcf.gz"
+        File output_vcf_idx = "~{vcf_base}_snps.vcf.gz.tbi"
+    }
+
+    runtime {
+        docker: docker_image
+        cpu: threads
+        memory: memSizeGB + " GB"
+        disks: "local-disk " + diskSizeGB + " SSD"
+    }
+}
+
 task tag_HQ {
     input {
         File bam
@@ -405,7 +442,7 @@ task tag_HQ {
         String vcf_base = basename(somatic_VCF_input, ".vcf.gz")
         
         String docker_image = "jiminpark/deepsomatic_postprocess:v3"
-        Int threads = 4
+        Int threads = 30
         Int memSizeGB = 4
         Int diskSizeGB = round(size(bam, 'G')) * 4
     }
