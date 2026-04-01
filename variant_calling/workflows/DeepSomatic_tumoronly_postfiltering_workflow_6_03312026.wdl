@@ -23,6 +23,9 @@ workflow DeepSomatic_filtering {
         File? germline_harmphase_IDX
         File? germline_VCF
         File? germline_IDX
+
+        File gnomad_VCF
+        File gnomad_IDX
     }
 
     call filter.filter_pass_somatic as filter_pass_somatic {
@@ -73,6 +76,8 @@ workflow DeepSomatic_filtering {
         input:
             germline_VCF = select_first([extract_snps_from_harmphase.output_vcf, germline_VCF]),
             germline_IDX = select_first([extract_snps_from_harmphase.output_vcf_idx, germline_IDX]),
+            gnomad_VCF = gnomad_VCF,
+            gnomad_IDX = gnomad_IDX,
             sample = sample
     }
 
@@ -104,6 +109,9 @@ workflow DeepSomatic_filtering {
 
         File somatic_filter_high_vaf = filter_high_vaf.output_vcf
         File somatic_filter_high_vaf_idx = filter_high_vaf.output_vcf_idx
+
+        File soamtic_intersect_dv_and_gnomad = intersect_dv_and_gnomad.output_vcf
+        File soamtic_intersect_dv_and_gnomad_idx = intersect_dv_and_gnomad.output_vcf_idx
 
         File somatic_tag_HQ_and_AH = tag_HQ.output_vcf
         File somatic_tag_HQ_and_AH_idx = tag_HQ.output_vcf_idx
