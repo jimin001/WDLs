@@ -393,7 +393,7 @@ task intersect_dv_and_gnomad {
 task extract_snps_from_harmphase {
     input {
         File harmphase_VCF
-        File harmphase_IDX
+        File? harmphase_IDX
 
         String sample
         String vcf_base = basename(harmphase_VCF, ".vcf.gz")
@@ -406,6 +406,8 @@ task extract_snps_from_harmphase {
 
     command <<<
         set -o xtrace
+
+        ~{if !defined(harmphase_IDX) then "bcftools index -t " + harmphase_VCF else ""}
 
         bcftools norm -m -any ~{harmphase_VCF} | bcftools view -v snps | bgzip > ~{vcf_base}_snps.vcf.gz
         bcftools index -t ~{vcf_base}_snps.vcf.gz
@@ -443,7 +445,7 @@ task tag_HQ {
         
         String docker_image = "jiminpark/deepsomatic_postprocess:v3"
         Int threads = 30
-        Int memSizeGB = 4
+        Int memSizeGB = 32
         Int diskSizeGB = round(size(bam, 'G')) * 4
     }
 
