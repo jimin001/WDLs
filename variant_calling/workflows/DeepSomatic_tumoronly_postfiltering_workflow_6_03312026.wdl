@@ -67,7 +67,6 @@ workflow DeepSomatic_filtering {
         call filter.extract_snps_from_harmphase as extract_snps_from_harmphase {
             input:
                 harmphase_VCF = select_first([germline_harmphase_VCF]),
-                harmphase_IDX = select_first([germline_harmphase_IDX]),
                 sample = sample
         }
     }
