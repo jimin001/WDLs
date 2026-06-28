@@ -428,6 +428,7 @@ task extract_snps_from_harmphase {
 
 task tag_HQ {
     input {
+        String script
         File bam
         File bai
 
@@ -463,7 +464,7 @@ task tag_HQ {
         
         mkdir -p "output_files"
 
-        python3 /opt/scripts/tag_haplotag_exclusive_multiprocessing_v3.py \
+        python3 /opt/scripts/~{script} \
         -bam ~{bam} \
         -v ~{somatic_VCF_input} \
         -g ~{germline_dv_intersect_gnomad} \
