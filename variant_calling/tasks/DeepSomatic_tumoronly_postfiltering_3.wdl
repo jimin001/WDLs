@@ -468,7 +468,7 @@ task filter_hap_exclusive {
         String sample
         String vcf_base = basename(somatic_VCF_input, ".vcf.gz")
 
-        String docker_image = "jiminpark/deepsomatic_postprocess"
+        String docker_image = "jiminpark/deepsomatic_postprocess:v3"
         Int threads = 1
         Int memSizeGB = 4
         Int diskSizeGB = 64
@@ -501,7 +501,7 @@ task filter_hap_vaf {
         String sample
         String vcf_base = basename(somatic_VCF_input, ".vcf.gz")
 
-        String docker_image = "jiminpark/deepsomatic_postprocess"
+        String docker_image = "jiminpark/deepsomatic_postprocess:v3"
         Int threads = 1
         Int memSizeGB = 4
         Int diskSizeGB = 64
@@ -535,7 +535,7 @@ task subtract_trhp_regions {
         String sample
         String vcf_base = basename(somatic_VCF_input, ".vcf.gz")
 
-        String docker_image = "jiminpark/deepsomatic_postprocess"
+        String docker_image = "jiminpark/deepsomatic_postprocess:v3"
         Int threads = 1
         Int memSizeGB = 4
         Int diskSizeGB = 64
