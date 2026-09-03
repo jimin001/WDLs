@@ -78,8 +78,8 @@ workflow DeepSomatic_filtering {
             bai = bai,
             germline_dv_intersect_gnomad = intersect_dv_and_gnomad.output_vcf,
             germline_dv_intersect_gnomad_idx = intersect_dv_and_gnomad.output_vcf_idx,
-            somatic_VCF_input = filter_high_vaf.output_vcf,
-            somatic_IDX_input = filter_high_vaf.output_vcf_idx
+            somatic_VCF_input = subtract_segdup_regions.output_vcf,
+            somatic_IDX_input = subtract_segdup_regions.output_vcf_idx
     }
 
     output {
