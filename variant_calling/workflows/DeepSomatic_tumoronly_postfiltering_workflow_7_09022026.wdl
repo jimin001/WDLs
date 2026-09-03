@@ -1,6 +1,6 @@
 version 1.0
 
-import "../tasks/DeepSomatic_tumoronly_postfiltering_2.wdl" as filter
+import "../tasks/DeepSomatic_tumoronly_postfiltering_3.wdl" as filter
 
 # this version of workflow:
 
@@ -82,6 +82,27 @@ workflow DeepSomatic_filtering {
             somatic_IDX_input = subtract_segdup_regions.output_vcf_idx
     }
 
+    call filter.filter_hap_exclusive as filter_hap_exclusive {
+        input:
+            somatic_VCF_input = tag_HQ.output_vcf,
+            somatic_IDX_input = tag_HQ.output_vcf_idx,
+            sample = sample
+    }
+
+    call filter.filter_hap_vaf as filter_hap_vaf {
+        input:
+            somatic_VCF_input = filter_hap_exclusive.output_vcf,
+            somatic_IDX_input = filter_hap_exclusive.output_vcf_idx,
+            sample = sample
+    }
+
+    call filter.subtract_trhp_regions as subtract_trhp_regions {
+        input:
+            somatic_VCF_input = filter_hap_vaf.output_vcf,
+            somatic_IDX_input = filter_hap_vaf.output_vcf_idx,
+            sample = sample
+    }
+
     output {
         File somatic_pass_only_vcf = filter_pass_somatic.somatic_pass_only_vcf
         File somatic_pass_only_vcf_idx = filter_pass_somatic.somatic_pass_only_vcf_idx
@@ -103,5 +124,14 @@ workflow DeepSomatic_filtering {
 
         File somatic_tag_HQ_and_AH = tag_HQ.output_vcf
         File somatic_tag_HQ_and_AH_idx = tag_HQ.output_vcf_idx
+
+        File somatic_hap_exclusive = filter_hap_exclusive.output_vcf
+        File somatic_hap_exclusive_idx = filter_hap_exclusive.output_vcf_idx
+
+        File somatic_hap_vaf = filter_hap_vaf.output_vcf
+        File somatic_hap_vaf_idx = filter_hap_vaf.output_vcf_idx
+
+        File somatic_trhp = subtract_trhp_regions.output_vcf
+        File somatic_trhp_idx = subtract_trhp_regions.output_vcf_idx
     }
 }
