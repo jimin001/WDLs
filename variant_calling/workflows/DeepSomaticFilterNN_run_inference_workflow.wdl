@@ -27,6 +27,15 @@ workflow DeepSomaticFilterNN_run_inference {
         File gnomad_vcf
         File gnomad_vcf_idx
 
+        File cpg_island_bed
+        File cpg_island_bed_idx
+        File cpg_shore_bed
+        File cpg_shore_bed_idx
+        File phastcons_bed
+        File phastcons_bed_idx
+        File segdup_bed
+        File segdup_bed_idx
+
         String output_suffix = "output_labeled.wg.filtered"
 
         Int threads = 16
@@ -48,6 +57,14 @@ workflow DeepSomaticFilterNN_run_inference {
             reference_gzi = reference_gzi,
             gnomad_vcf = gnomad_vcf,
             gnomad_vcf_idx = gnomad_vcf_idx,
+            cpg_island_bed = cpg_island_bed,
+            cpg_island_bed_idx = cpg_island_bed_idx,
+            cpg_shore_bed = cpg_shore_bed,
+            cpg_shore_bed_idx = cpg_shore_bed_idx,
+            phastcons_bed = phastcons_bed,
+            phastcons_bed_idx = phastcons_bed_idx,
+            segdup_bed = segdup_bed,
+            segdup_bed_idx = segdup_bed_idx,
             sample = sample,
             output_suffix = output_suffix,
             threads = threads,
