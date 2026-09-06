@@ -397,6 +397,7 @@ task extract_snps_from_harmphase {
 
 task tag_HQ {
     input {
+        # script should be "tag_haplotag_exclusive_multiprocessing_v5.py"
         String script
         File bam
         File bai
@@ -413,8 +414,9 @@ task tag_HQ {
 
         String vcf_base = basename(somatic_VCF_input, ".vcf.gz")
         
-        # docker: latest v3 version, updated because wdl was not pulling latest version after changes to v3
-        String docker_image = "jiminpark/deepsomatic_postprocess@sha256:fe5799077a266ac9f35d662a28a99a85eabb3f373abc3419490802a3374d3e28"
+        # docker: latest v5:
+        # minbasequality = 10, requires one hap to be 100% ref taking into account only hq reads
+        String docker_image = "jiminpark/deepsomatic_postprocess:v5"
         Int threads = 30
         Int memSizeGB = 32
         Int diskSizeGB = round(size(bam, 'G')) * 4
