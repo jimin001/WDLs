@@ -20,6 +20,15 @@ task make_examples {
         File gnomad_vcf
         File gnomad_vcf_idx
 
+        File cpg_island_bed
+        File cpg_island_bed_idx
+        File cpg_shore_bed
+        File cpg_shore_bed_idx
+        File phastcons_bed
+        File phastcons_bed_idx
+        File segdup_bed
+        File segdup_bed_idx
+
         String sample
         String output_suffix = "train"
         String label_field = "type"
@@ -32,15 +41,6 @@ task make_examples {
         Int memSizeGB = 300
         Int diskSizeGB = 5 * round(size(bam, "G")) + 50
     }
-
-    File cpg_island_bed = "/private/groups/patenlab/jimin/scripts/deepsomatic_filter_nn/annotations/cpg_islands.bed.gz"
-    File cpg_island_bed_idx = "/private/groups/patenlab/jimin/scripts/deepsomatic_filter_nn/annotations/cpg_islands.bed.gz.tbi"
-    File cpg_shore_bed = "/private/groups/patenlab/jimin/scripts/deepsomatic_filter_nn/annotations/cpg_shores.bed.gz"
-    File cpg_shore_bed_idx = "/private/groups/patenlab/jimin/scripts/deepsomatic_filter_nn/annotations/cpg_shores.bed.gz.tbi"
-    File phastcons_bed = "/private/groups/patenlab/jimin/scripts/deepsomatic_filter_nn/annotations/phastcons.bed.gz"
-    File phastcons_bed_idx = "/private/groups/patenlab/jimin/scripts/deepsomatic_filter_nn/annotations/phastcons.bed.gz.tbi"
-    File segdup_bed = "/private/groups/patenlab/jimin/scripts/deepsomatic_filter_nn/annotations/segdups.bed.gz"
-    File segdup_bed_idx = "/private/groups/patenlab/jimin/scripts/deepsomatic_filter_nn/annotations/segdups.bed.gz.tbi"
 
     command <<<
         set -o pipefail
@@ -156,6 +156,15 @@ task run_inference {
         File gnomad_vcf
         File gnomad_vcf_idx
 
+        File cpg_island_bed
+        File cpg_island_bed_idx
+        File cpg_shore_bed
+        File cpg_shore_bed_idx
+        File phastcons_bed
+        File phastcons_bed_idx
+        File segdup_bed
+        File segdup_bed_idx
+
         String sample
         String output_suffix = "output_labeled.wg.filtered"
 
@@ -164,15 +173,6 @@ task run_inference {
         Int memSizeGB = 300
         Int diskSizeGB = 5 * round(size(bam, "G")) + 50
     }
-
-    File cpg_island_bed = "/private/groups/patenlab/jimin/scripts/deepsomatic_filter_nn/annotations/cpg_islands.bed.gz"
-    File cpg_island_bed_idx = "/private/groups/patenlab/jimin/scripts/deepsomatic_filter_nn/annotations/cpg_islands.bed.gz.tbi"
-    File cpg_shore_bed = "/private/groups/patenlab/jimin/scripts/deepsomatic_filter_nn/annotations/cpg_shores.bed.gz"
-    File cpg_shore_bed_idx = "/private/groups/patenlab/jimin/scripts/deepsomatic_filter_nn/annotations/cpg_shores.bed.gz.tbi"
-    File phastcons_bed = "/private/groups/patenlab/jimin/scripts/deepsomatic_filter_nn/annotations/phastcons.bed.gz"
-    File phastcons_bed_idx = "/private/groups/patenlab/jimin/scripts/deepsomatic_filter_nn/annotations/phastcons.bed.gz.tbi"
-    File segdup_bed = "/private/groups/patenlab/jimin/scripts/deepsomatic_filter_nn/annotations/segdups.bed.gz"
-    File segdup_bed_idx = "/private/groups/patenlab/jimin/scripts/deepsomatic_filter_nn/annotations/segdups.bed.gz.tbi"
 
     command <<<
         set -o pipefail
