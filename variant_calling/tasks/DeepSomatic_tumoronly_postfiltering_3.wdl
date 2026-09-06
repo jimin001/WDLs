@@ -416,7 +416,7 @@ task tag_HQ {
         
         # docker: latest v5:
         # minbasequality = 10, requires one hap to be 100% ref taking into account only hq reads
-        String docker_image = "jiminpark/deepsomatic_postprocess:v5"
+        String docker_image = "jiminpark/deepsomatic_postprocess:validate"
         Int threads = 30
         Int memSizeGB = 32
         Int diskSizeGB = round(size(bam, 'G')) * 4
