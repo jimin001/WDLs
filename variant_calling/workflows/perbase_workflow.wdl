@@ -8,6 +8,7 @@ workflow Perbase {
         File bam_idx
         String sample
 
+        File? bed_file
         Int min_base_quality_score = 20
         Int min_mapq = 10
 
@@ -22,6 +23,7 @@ workflow Perbase {
             bam = bam,
             bam_idx = bam_idx,
             sample = sample,
+            bed_file = bed_file,
             min_base_quality_score = min_base_quality_score,
             min_mapq = min_mapq,
             docker_image = docker_image,

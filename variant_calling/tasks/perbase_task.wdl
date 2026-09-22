@@ -6,6 +6,7 @@ task perbase {
         File bam_idx
         String sample
 
+        File? bed_file
         Int min_base_quality_score = 20
         Int min_mapq = 10
 
@@ -28,7 +29,8 @@ task perbase {
             -o ~{sample}_perbase_output.tsv \
             -t ~{threads} \
             --min-base-quality-score ~{min_base_quality_score} \
-            --min-mapq ~{min_mapq}
+            --min-mapq ~{min_mapq} \
+            ~{"-b " + bed_file}
     >>>
 
     output {
