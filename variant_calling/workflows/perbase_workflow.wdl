@@ -9,10 +9,12 @@ workflow Perbase {
         String sample
 
         File? bed_file
-        Int min_base_quality_score = 20
+        Int min_base_quality_score = 10
         Int min_mapq = 10
+        Int exclude_flags = 3848
+        Int compression_level = 6
 
-        String docker_image = "jiminpark/perbase:1.4.0"
+        String docker_image = "jiminpark/perbase:1.4.0-bgzip"
         Int threads = 8
         Int memSizeGB = 32
         Int diskSizeGB = 0
@@ -26,6 +28,8 @@ workflow Perbase {
             bed_file = bed_file,
             min_base_quality_score = min_base_quality_score,
             min_mapq = min_mapq,
+            exclude_flags = exclude_flags,
+            compression_level = compression_level,
             docker_image = docker_image,
             threads = threads,
             memSizeGB = memSizeGB,
