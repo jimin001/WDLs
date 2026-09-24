@@ -7,7 +7,7 @@ task perbase {
         String sample
 
         File? bed_file
-        Int min_base_quality_score = 20
+        Int min_base_quality_score = 10
         Int min_mapq = 10
         # 3848 = secondary (256) + QC-fail (512) + duplicate (1024) + supplementary (2048)
         Int exclude_flags = 3848
