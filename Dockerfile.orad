@@ -1,0 +1,18 @@
+FROM ubuntu:22.04
+MAINTAINER Jimin Park, jpark621@ucsc.edu
+
+# update and install dependencies
+RUN apt-get update && \
+    apt-get -y install wget ca-certificates libuuid1 && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /home/apps
+
+### orad (Illumina ORA decompression; tarball includes the oradata reference)
+ARG ORAD_VERSION=2.7.0
+RUN cd /home/apps && \
+	wget https://webdata.illumina.com/downloads/software/dragen-decompression/orad.${ORAD_VERSION}.linux.tar.gz && \
+	tar -xzf orad.${ORAD_VERSION}.linux.tar.gz && \
+	rm orad.${ORAD_VERSION}.linux.tar.gz
+ENV PATH="/home/apps/orad.${ORAD_VERSION}.linux:$PATH"
+ENV ORA_REF_PATH="/home/apps/orad.${ORAD_VERSION}.linux/oradata"

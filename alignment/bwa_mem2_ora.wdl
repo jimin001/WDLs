@@ -52,6 +52,7 @@ task decompressOra {
 
         Int threads = 16
         Int memSizeGB = 32
+        Int preemptible = 2
     }
     # ORA is ~5x smaller than fastq.gz; leave room for the gz output
     Int ora_size = ceil(size(ora_fastq, "GB"))
@@ -79,10 +80,16 @@ task decompressOra {
             -t ~{threads} \
             -o working/~{out_name} \
             ~{ora_fastq}
+
+        # quick sanity check: ora file stats + first two reads of the output
+        orad -i ~{ora_fastq} > working/~{out_name}.summary.txt
+        echo "--- first 2 reads ---" >> working/~{out_name}.summary.txt
+        { zcat working/~{out_name} || true; } | head -n 8 >> working/~{out_name}.summary.txt
     >>>
 
     output {
         File fastq_gz = "working/~{out_name}"
+        File summary = "working/~{out_name}.summary.txt"
     }
 
     runtime {
@@ -90,6 +97,7 @@ task decompressOra {
         cpu: threads
         disks: "local-disk " + diskSizeGB + " SSD"
         docker: docker_image
+        preemptible: preemptible
     }
 }
 
