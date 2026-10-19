@@ -65,7 +65,9 @@ task bwaMem2Ora {
         Int orad_threads = 4
         Int sort_threads = 8
         Int memSizeGB = 96
-        Int preemptible = 2
+        # long 64-core job is preempted often and restarts from scratch each time;
+        # one cheap try, then on-demand
+        Int preemptible = 1
 
         Int? diskSizeGB
     }
