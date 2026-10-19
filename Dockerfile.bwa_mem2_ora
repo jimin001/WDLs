@@ -1,0 +1,13 @@
+# jiminpark/aligners (samtools, bwa-mem2, ...) + orad, so ORA fastqs can be
+# streamed straight into bwa-mem2 without an intermediate fastq.gz
+FROM jiminpark/aligners
+MAINTAINER Jimin Park, jpark621@ucsc.edu
+
+### orad (Illumina ORA decompression; tarball includes the oradata reference)
+ARG ORAD_VERSION=2.7.0
+RUN cd /home/apps && \
+	wget https://webdata.illumina.com/downloads/software/dragen-decompression/orad.${ORAD_VERSION}.linux.tar.gz && \
+	tar -xzf orad.${ORAD_VERSION}.linux.tar.gz && \
+	rm orad.${ORAD_VERSION}.linux.tar.gz
+ENV PATH="/home/apps/orad.${ORAD_VERSION}.linux:$PATH"
+ENV ORA_REF_PATH="/home/apps/orad.${ORAD_VERSION}.linux/oradata"
