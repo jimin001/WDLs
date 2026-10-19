@@ -130,20 +130,21 @@ task splitOra {
             exit 1
         fi
 
-        # explicit, sorted file lists so the R1/R2 arrays line up in the scatter
-        ls R1_chunk_*.fastq.gz | sort > r1_chunks.txt
-        ls R2_chunk_*.fastq.gz | sort > r2_chunks.txt
-        if [[ $(wc -l < r1_chunks.txt) -ne $(wc -l < r2_chunks.txt) ]]
+        N_R1=$(ls R1_chunk_*.fastq.gz | wc -l)
+        N_R2=$(ls R2_chunk_*.fastq.gz | wc -l)
+        if [[ ${N_R1} -ne ${N_R2} ]]
         then
             echo "R1 and R2 produced different numbers of chunks; read counts differ" >&2
             exit 1
         fi
-        wc -l < r1_chunks.txt | sed 's/^/n_chunks: /' >> ora_summary.txt
+        echo "n_chunks: ${N_R1}" >> ora_summary.txt
     >>>
 
     output {
-        Array[File] r1_chunks = prefix("working/", read_lines("working/r1_chunks.txt"))
-        Array[File] r2_chunks = prefix("working/", read_lines("working/r2_chunks.txt"))
+        # glob, not read_lines: Cromwell on Terra only delocalizes outputs it can resolve
+        # before reading task files. alignChunk checks the R1/R2 chunk numbers match
+        Array[File] r1_chunks = glob("working/R1_chunk_*.fastq.gz")
+        Array[File] r2_chunks = glob("working/R2_chunk_*.fastq.gz")
         File ora_summary = "working/ora_summary.txt"
     }
 
@@ -181,8 +182,10 @@ task alignChunk {
     Int index_size = ceil(size([ref_0123, ref_amb, ref_ann, ref_bwt_2bit_64, ref_pac], "GB"))
     Int diskSizeGB = 4 * fastq_size + index_size + 20
 
-    # R1_chunk_0003.fastq.gz -> chunk_0003.sorted.bam
-    String chunk_bam_name = sub(basename(fastq1, ".fastq.gz"), "^R1_", "") + ".sorted.bam"
+    # R1_chunk_0003.fastq.gz -> chunk_0003
+    String chunk_id = sub(basename(fastq1, ".fastq.gz"), "^R1_", "")
+    String chunk2_id = sub(basename(fastq2, ".fastq.gz"), "^R2_", "")
+    String chunk_bam_name = chunk_id + ".sorted.bam"
 
     command <<<
         # Set the exit code of a pipeline to that of the rightmost command
@@ -195,6 +198,13 @@ task alignChunk {
         # echo each line of the script to stdout so we can see what is happening
         # to turn off echo do 'set +o xtrace'
         set -o xtrace
+
+        # R1/R2 come from two separate globs; never align mismatched chunks
+        if [[ "~{chunk_id}" != "~{chunk2_id}" ]]
+        then
+            echo "R1/R2 chunk mismatch: ~{chunk_id} vs ~{chunk2_id}" >&2
+            exit 1
+        fi
 
         mkdir working ref
         cd working
