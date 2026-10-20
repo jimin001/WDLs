@@ -23,8 +23,8 @@ workflow validateBam {
     output {
         File validation_report = checkBamIntegrity.validation_report
         File flagstat = checkBamIntegrity.flagstat
-        Int total_reads = checkBamIntegrity.total_reads
-        Int mapped_reads = checkBamIntegrity.mapped_reads
+        String total_reads = checkBamIntegrity.total_reads
+        String mapped_reads = checkBamIntegrity.mapped_reads
         Float average_coverage = averageCoverage.average_coverage
         File coverage_report = averageCoverage.coverage_report
     }
@@ -73,8 +73,9 @@ task checkBamIntegrity {
         samtools flagstat -@ ~{threads} ~{bam} > ~{sample_name}.flagstat.txt
         echo "flagstat full read-through: PASS" >> ${REPORT}
 
-        TOTAL=$(awk 'NR==1 {print $1 + $3}' ~{sample_name}.flagstat.txt)
-        MAPPED=$(grep -m1 " mapped (" ~{sample_name}.flagstat.txt | awk '{print $1 + $3}')
+        # printf %.0f so awk doesn't switch to scientific notation for billions of reads
+        TOTAL=$(awk 'NR==1 {printf "%.0f\n", $1 + $3}' ~{sample_name}.flagstat.txt)
+        MAPPED=$(grep -m1 " mapped (" ~{sample_name}.flagstat.txt | awk '{printf "%.0f\n", $1 + $3}')
         echo ${TOTAL} > total_reads.txt
         echo ${MAPPED} > mapped_reads.txt
         echo "total reads: ${TOTAL}" >> ${REPORT}
@@ -113,8 +114,9 @@ task checkBamIntegrity {
     output {
         File validation_report = "working/~{sample_name}.validation_report.txt"
         File flagstat = "working/~{sample_name}.flagstat.txt"
-        Int total_reads = read_int("working/total_reads.txt")
-        Int mapped_reads = read_int("working/mapped_reads.txt")
+        # String, not Int: Cromwell's Int is 32-bit and WGS read counts can exceed 2^31
+        String total_reads = read_string("working/total_reads.txt")
+        String mapped_reads = read_string("working/mapped_reads.txt")
     }
 
     runtime {
