@@ -4,6 +4,10 @@ version 1.0
 # output of bwa_mem2_ora_chunked.wdl, which does not mark duplicates. Reads are only
 # flagged, not removed.
 #
+# calculate_coverage: also report mean depth over chr1-22,X,Y (or over region) from the
+#   marked BAM, counting duplicates and skipping them, to see how much depth was duplicates.
+#   Depth includes zero-coverage positions (and reference N gaps), unfiltered by MAPQ/baseQ.
+#
 # region unset: mark the whole BAM -> <sample>.markdup.bam + index + stats
 # region set (e.g. "chr22"): only mark reads in that region, to cheaply estimate the
 #   duplicate rate before committing to a whole-genome run. Needs bam_index. Pairs whose
@@ -16,6 +20,7 @@ workflow markDuplicates {
         File bam
         File? bam_index
         String? region
+        Boolean calculate_coverage = true
     }
 
     call markDuplicatesSamtools {
@@ -23,7 +28,8 @@ workflow markDuplicates {
             sample_name = sample_name,
             bam = bam,
             bam_index = bam_index,
-            region = region
+            region = region,
+            calculate_coverage = calculate_coverage
     }
 
     output {
@@ -32,6 +38,9 @@ workflow markDuplicates {
         File markdup_stats = markDuplicatesSamtools.markdup_stats
         Float duplicate_rate = markDuplicatesSamtools.duplicate_rate
         Float optical_duplicate_rate = markDuplicatesSamtools.optical_duplicate_rate
+        File? coverage_report = markDuplicatesSamtools.coverage_report
+        Float? mean_coverage_with_duplicates = markDuplicatesSamtools.mean_coverage_with_duplicates
+        Float? mean_coverage_without_duplicates = markDuplicatesSamtools.mean_coverage_without_duplicates
     }
 
 }
@@ -46,6 +55,7 @@ task markDuplicatesSamtools {
         File bam
         File? bam_index
         String? region
+        Boolean calculate_coverage = true
 
         # max pixel distance for optical duplicates:
         # 2500 for patterned flow cells (NovaSeq, HiSeq X/4000), 100 for unpatterned (HiSeq 2500, NextSeq)
@@ -55,6 +65,10 @@ task markDuplicatesSamtools {
         Int memSizeGB = 48
         # a whole-genome run is several hours and restarts from scratch if preempted
         Int preemptible = if defined(region) then 2 else 0
+
+        # never set: WDL 1.0 has no None literal for the optional coverage outputs
+        File? NONE_FILE
+        Float? NONE_FLOAT
     }
     Int bam_size = ceil(size(bam, "GB"))
     # whole BAM: input + collate temp files + sort temp files + output
@@ -125,6 +139,45 @@ task markDuplicatesSamtools {
             }' ~{out_prefix}.markdup_stats.txt
 
         rm -f input.region.bam
+
+        if [[ "~{calculate_coverage}" == "true" ]]
+        then
+            if [[ "~{region}" != "" ]]
+            then
+                echo "~{region}" > contigs.txt
+            else
+                samtools idxstats ~{out_bam} | cut -f 1 | grep -E '^(chr)?([0-9]+|X|Y)$' > contigs.txt
+            fi
+
+            # samtools coverage is single threaded, so run each contig (with and without duplicates) in parallel.
+            # --ff defaults to UNMAP,SECONDARY,QCFAIL,DUP; dropping DUP counts the duplicates
+            mkdir coverage_tmp
+            while read -r CONTIG
+            do
+                SAFE=$(echo ${CONTIG} | tr ':' '_')
+                echo "UNMAP,SECONDARY,QCFAIL ${CONTIG} coverage_tmp/with_dups.${SAFE}.tsv"
+                echo "UNMAP,SECONDARY,QCFAIL,DUP ${CONTIG} coverage_tmp/without_dups.${SAFE}.tsv"
+            done < contigs.txt \
+            | xargs -P ~{threads} -n 3 sh -c 'samtools coverage -H -d 0 --ff "$0" -r "$1" ~{out_bam} > "$2"'
+
+            # per-contig report in contigs.txt order; region mode reports the region's bounds
+            echo -e "contig\tstart\tend\tlength\tmeandepth_with_duplicates\tmeandepth_without_duplicates" > ~{out_prefix}.coverage.tsv
+            while read -r CONTIG
+            do
+                SAFE=$(echo ${CONTIG} | tr ':' '_')
+                paste coverage_tmp/with_dups.${SAFE}.tsv coverage_tmp/without_dups.${SAFE}.tsv \
+                | awk -v OFS='\t' '{print $1, $2, $3, $3 - $2 + 1, $7, $16}'
+            done < contigs.txt >> ~{out_prefix}.coverage.tsv
+
+            # length-weighted mean depth across contigs
+            awk -F'\t' 'NR > 1 {len += $4; with += $4 * $5; without += $4 * $6}
+                END {
+                    printf "%.4f\n", with / len > "mean_coverage_with_duplicates.txt"
+                    printf "%.4f\n", without / len > "mean_coverage_without_duplicates.txt"
+                }' ~{out_prefix}.coverage.tsv
+
+            rm -rf coverage_tmp
+        fi
     >>>
 
     output {
@@ -133,6 +186,9 @@ task markDuplicatesSamtools {
         File markdup_stats = "working/~{out_prefix}.markdup_stats.txt"
         Float duplicate_rate = read_float("working/duplicate_rate.txt")
         Float optical_duplicate_rate = read_float("working/optical_duplicate_rate.txt")
+        File? coverage_report = if calculate_coverage then "working/~{out_prefix}.coverage.tsv" else NONE_FILE
+        Float? mean_coverage_with_duplicates = if calculate_coverage then read_float("working/mean_coverage_with_duplicates.txt") else NONE_FLOAT
+        Float? mean_coverage_without_duplicates = if calculate_coverage then read_float("working/mean_coverage_without_duplicates.txt") else NONE_FLOAT
     }
 
     runtime {
