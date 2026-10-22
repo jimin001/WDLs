@@ -81,8 +81,8 @@ task split_bams {
                 String region
 
                 String docker_image = "jiminpark/deepsomatic_postprocess"
-                Int threads
-                Int memSizeGB = 128
+                Int threads = 4
+                Int memSizeGB = 8
                 Int diskSizeGB = 2 * round(size(bam, 'G')) + 50
         }
 
