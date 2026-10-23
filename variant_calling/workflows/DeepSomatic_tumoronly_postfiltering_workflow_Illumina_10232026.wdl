@@ -14,11 +14,14 @@ workflow DeepSomatic_filtering {
         String sample
     }
 
+    # downstream tasks name outputs off the input basename, so tagging here carries "Illumina" through every file
+    String sample_tagged = sample + "_Illumina"
+
     call filter.filter_pass_somatic as filter_pass_somatic {
         input:
             somatic_VCF = somatic_VCF,
             somatic_IDX = somatic_IDX,
-            sample = sample
+            sample = sample_tagged
     }
 
     call filter.tag_gnomad_filter_all as tag_gnomad_filter_all {
