@@ -136,6 +136,8 @@ task somalierExtract {
         cpu: threads
         disks: "local-disk " + diskSizeGB + " SSD"
         docker: docker_image
+        # retry transient failures such as Docker Hub pull rate limits
+        maxRetries: 2
     }
 }
 
@@ -231,5 +233,7 @@ task somalierRelate {
         cpu: threads
         disks: "local-disk " + diskSizeGB + " SSD"
         docker: docker_image
+        # retry transient failures such as Docker Hub pull rate limits
+        maxRetries: 2
     }
 }
