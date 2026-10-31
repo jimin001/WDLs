@@ -4,7 +4,6 @@ version 1.0
 # Run per sample (one Terra data-table row). --fast-mode skips per-base CIGAR/mate-overlap
 # handling, which only matters at base resolution, and --no-per-base drops the per-base output,
 # so the result is mean depth per bin_size window plus whole-genome summaries.
-# Default read filter excludes unmapped, secondary, QC-fail and duplicate reads (-F 1796).
 
 workflow mosdepthCoverage {
     input {
@@ -14,7 +13,12 @@ workflow mosdepthCoverage {
 
         # 1 Mb matches the ONT perbase outline bins in the strip plot
         Int bin_size = 1000000
-        Int min_mapq = 0
+        # 20 matches check_pacbio_signal and DeepSomaticFilterNN on Illumina; drops multi-mapped
+        # reads so low-mappability regions show as dips. 0 counts every mapped read
+        Int min_mapq = 20
+        # unmapped, secondary, QC-fail, duplicate and supplementary; mosdepth's default 1796 keeps
+        # supplementary, while ONT perbase (-F 3848) drops it
+        Int exclude_flags = 3844
     }
 
     call mosdepth {
@@ -23,7 +27,8 @@ workflow mosdepthCoverage {
             bam = bam,
             bam_index = bam_index,
             bin_size = bin_size,
-            min_mapq = min_mapq
+            min_mapq = min_mapq,
+            exclude_flags = exclude_flags
     }
 
     output {
@@ -43,7 +48,8 @@ task mosdepth {
         File bam_index
 
         Int bin_size = 1000000
-        Int min_mapq = 0
+        Int min_mapq = 20
+        Int exclude_flags = 3844
 
         # mosdepth uses threads only for BAM decompression; gains flatten past ~4
         Int threads = 4
@@ -78,6 +84,7 @@ task mosdepth {
             --no-per-base \
             --by ~{bin_size} \
             --mapq ~{min_mapq} \
+            --flag ~{exclude_flags} \
             ~{sample_name} \
             input.bam
 
