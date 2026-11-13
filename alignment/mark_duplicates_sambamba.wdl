@@ -146,7 +146,10 @@ task duplicateStats {
         Boolean calculate_coverage = true
 
         Int threads = 16
-        Int memSizeGB = 16
+        # samtools coverage processes run at once (2 per contig). Each holds every read overlapping
+        # the current position, so very deep regions (satellites, centromeres) use a lot of memory
+        Int coverage_parallel = 8
+        Int memSizeGB = 32
         # only reads the marked BAM, so a preemption just repeats this cheap step
         Int preemptible = 2
 
@@ -192,14 +195,15 @@ task duplicateStats {
             samtools idxstats input.bam | cut -f 1 | grep -E '^(chr)?([0-9]+|X|Y)$' > contigs.txt
 
             # samtools coverage is single threaded, so run each contig (with and without duplicates) in parallel.
-            # --ff defaults to UNMAP,SECONDARY,QCFAIL,DUP; dropping DUP counts the duplicates
+            # --ff defaults to UNMAP,SECONDARY,QCFAIL,DUP; dropping DUP counts the duplicates.
+            # keep the default -d (1,000,000) depth cap: -d 0 removes it and lets pileup memory grow without bound
             mkdir coverage_tmp
             while read -r CONTIG
             do
                 echo "UNMAP,SECONDARY,QCFAIL ${CONTIG} coverage_tmp/with_dups.${CONTIG}.tsv"
                 echo "UNMAP,SECONDARY,QCFAIL,DUP ${CONTIG} coverage_tmp/without_dups.${CONTIG}.tsv"
             done < contigs.txt \
-            | xargs -P ~{threads} -n 3 sh -c 'samtools coverage -H -d 0 --ff "$0" -r "$1" input.bam > "$2"'
+            | xargs -P ~{coverage_parallel} -n 3 sh -c 'samtools coverage -H --ff "$0" -r "$1" input.bam > "$2"'
 
             echo -e "contig\tstart\tend\tlength\tmeandepth_with_duplicates\tmeandepth_without_duplicates" > ~{sample_name}.coverage.tsv
             while read -r CONTIG
