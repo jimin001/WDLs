@@ -30,6 +30,7 @@ workflow DeepSomatic_tumoronly_split_bams {
             input:
                     tumor_bam = split_bams.region_bam,
                     tumor_bam_idx = split_bams.region_bai,
+                    region = region,
                     output_prefix = output_prefix,
                     sample_name_tumor = sample
         }
