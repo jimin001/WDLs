@@ -245,6 +245,9 @@ task filter_GQ_and_DP {
         String sample
         String vcf_base = basename(somatic_VCF_input, ".vcf.gz")
 
+        Int min_GQ = 20  # set to 0 to disable GQ filtering
+        Int min_DP = 10
+
         String docker_image = "jiminpark/deepsomatic_postprocess"
         Int threads = 1
         Int memSizeGB = 4
@@ -256,13 +259,13 @@ task filter_GQ_and_DP {
         # to turn off echo do 'set +o xtrace'
         set -o xtrace
 
-        bcftools view -e 'FMT/GQ<20' ~{somatic_VCF_input} | bcftools view -e 'FMT/DP<10' | bgzip > ~{vcf_base}_GQ20_DP10.vcf.gz
-        bcftools index -t ~{vcf_base}_GQ20_DP10.vcf.gz
+        bcftools view -e 'FMT/GQ<~{min_GQ}' ~{somatic_VCF_input} | bcftools view -e 'FMT/DP<~{min_DP}' | bgzip > ~{vcf_base}_GQ~{min_GQ}_DP~{min_DP}.vcf.gz
+        bcftools index -t ~{vcf_base}_GQ~{min_GQ}_DP~{min_DP}.vcf.gz
     >>>
 
     output {
-        File output_vcf = "~{vcf_base}_GQ20_DP10.vcf.gz"
-        File output_vcf_idx = "~{vcf_base}_GQ20_DP10.vcf.gz.tbi"
+        File output_vcf = "~{vcf_base}_GQ~{min_GQ}_DP~{min_DP}.vcf.gz"
+        File output_vcf_idx = "~{vcf_base}_GQ~{min_GQ}_DP~{min_DP}.vcf.gz.tbi"
     }
 
     runtime {

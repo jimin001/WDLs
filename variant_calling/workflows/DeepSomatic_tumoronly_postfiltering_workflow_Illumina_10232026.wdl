@@ -3,7 +3,7 @@ version 1.0
 import "../tasks/DeepSomatic_tumoronly_postfiltering_3.wdl" as filter
 
 # this version of workflow: Illumina postfiltering
-# PASS -> gnomAD filter -> GQ/DP -> segdup subtraction -> TR/HP subtraction
+# PASS -> gnomAD filter -> DP (GQ filter disabled, min_GQ = 0) -> segdup subtraction -> TR/HP subtraction
 # (no haplotype-based filters, so no BAM or germline VCF needed)
 
 workflow DeepSomatic_filtering {
@@ -35,7 +35,8 @@ workflow DeepSomatic_filtering {
         input:
             somatic_VCF_input = tag_gnomad_filter_all.gnomad_filter_VCF ,
             somatic_IDX_input = tag_gnomad_filter_all.gnomad_filter_IDX ,
-            sample = sample
+            sample = sample,
+            min_GQ = 0
     }
 
     call filter.subtract_segdup_regions as subtract_segdup_regions {
@@ -59,8 +60,8 @@ workflow DeepSomatic_filtering {
         File somatic_gnomad_filter = tag_gnomad_filter_all.gnomad_filter_VCF
         File somatic_gnomad_filter_idx = tag_gnomad_filter_all.gnomad_filter_IDX
 
-        File somatic_GQ20_DP10 = filter_GQ_and_DP.output_vcf
-        File somatic_GQ20_DP10_idx = filter_GQ_and_DP.output_vcf_idx
+        File somatic_GQ0_DP10 = filter_GQ_and_DP.output_vcf
+        File somatic_GQ0_DP10_idx = filter_GQ_and_DP.output_vcf_idx
 
         File somatic_segdup = subtract_segdup_regions.output_vcf
         File somatic_segdup_idx = subtract_segdup_regions.output_vcf_idx
