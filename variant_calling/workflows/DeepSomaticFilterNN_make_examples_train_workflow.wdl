@@ -6,18 +6,15 @@ version 1.0
 
 import "../tasks/DeepSomaticFilterNN_task.wdl" as filter_nn
 
-struct FilterNNLabeledSample {
-    String sample
-    File bam
-    File bai
-    # labeled VCF: INFO/<label_field> = positive | negative
-    File vcf
-    File vcf_idx
-}
-
 workflow DeepSomaticFilterNN_make_examples_train {
     input {
-        Array[FilterNNLabeledSample] training_samples
+        # one entry per training sample; all five arrays must be in the same sample order
+        Array[String] samples
+        Array[File] bams
+        Array[File] bais
+        # labeled VCFs: INFO/<label_field> = positive | negative
+        Array[File] vcfs
+        Array[File] vcf_idxs
 
         # training regions shared by every sample, e.g. 11train_11test.bed
         File region_bed
@@ -59,13 +56,13 @@ workflow DeepSomaticFilterNN_make_examples_train {
         Int preemptible = 3
     }
 
-    scatter (training_sample in training_samples) {
+    scatter (i in range(length(samples))) {
         call filter_nn.make_examples as make_examples {
             input:
-                bam = training_sample.bam,
-                bai = training_sample.bai,
-                vcf = training_sample.vcf,
-                vcf_idx = training_sample.vcf_idx,
+                bam = bams[i],
+                bai = bais[i],
+                vcf = vcfs[i],
+                vcf_idx = vcf_idxs[i],
                 region_bed = region_bed,
                 reference = reference,
                 reference_idx = reference_idx,
@@ -80,7 +77,7 @@ workflow DeepSomaticFilterNN_make_examples_train {
                 phastcons_bed_idx = phastcons_bed_idx,
                 segdup_bed = segdup_bed,
                 segdup_bed_idx = segdup_bed_idx,
-                sample = training_sample.sample,
+                sample = samples[i],
                 output_suffix = examples_suffix,
                 label_field = label_field,
                 methylation = methylation,
