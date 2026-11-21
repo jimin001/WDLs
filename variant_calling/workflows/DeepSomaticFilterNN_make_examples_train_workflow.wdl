@@ -49,12 +49,14 @@ workflow DeepSomaticFilterNN_make_examples_train {
         String model_prefix = "xgboost_somatic_filter"
         String model_type = "xgboost"
 
-        Int make_examples_threads = 16
-        Int make_examples_memSizeGB = 300
-
-        # training data is only a few thousand rows, so a small machine is enough
-        Int train_threads = 8
-        Int train_memSizeGB = 64
+        # measured on the 11train_11test vPoN2x2_NR5 set: make-examples ~1 min / ~2 GB peak per
+        # sample (reads at labeled sites are streamed from the BAM, not the whole BAM);
+        # train 6 s / 0.24 GB peak
+        Int make_examples_threads = 8
+        Int make_examples_memSizeGB = 16
+        Int train_threads = 4
+        Int train_memSizeGB = 8
+        Int preemptible = 3
     }
 
     scatter (training_sample in training_samples) {
@@ -85,7 +87,8 @@ workflow DeepSomaticFilterNN_make_examples_train {
                 min_mapq = min_mapq,
                 workers = workers,
                 threads = make_examples_threads,
-                memSizeGB = make_examples_memSizeGB
+                memSizeGB = make_examples_memSizeGB,
+                preemptible = preemptible
         }
     }
 
@@ -95,7 +98,8 @@ workflow DeepSomaticFilterNN_make_examples_train {
             output_prefix = model_prefix,
             model_type = model_type,
             threads = train_threads,
-            memSizeGB = train_memSizeGB
+            memSizeGB = train_memSizeGB,
+            preemptible = preemptible
     }
 
     output {

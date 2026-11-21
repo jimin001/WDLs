@@ -37,9 +37,18 @@ task make_examples {
         Int workers = 8
 
         String docker_image = "google/deepvariant:filter_nn"
-        Int threads = 16
-        Int memSizeGB = 300
-        Int diskSizeGB = 5 * round(size(bam, "G")) + 50
+        # make-examples on RUSH_008 (743 sites, 8 workers): 49 s, ~2 GB peak
+        Int threads = 8
+        Int memSizeGB = 16
+        # the BAM is streamed, not localized: only reads at the labeled sites land on disk
+        # (~0.9 MB per site for ~30x ONT), plus gnomAD (~5 GB) and the reference
+        Int diskSizeGB = ceil(size(gnomad_vcf, "GB") + size(reference, "GB")) + 50
+        Int preemptible = 3
+    }
+
+    parameter_meta {
+        bam: { localization_optional: true }
+        bai: { localization_optional: true }
     }
 
     command <<<
@@ -48,10 +57,32 @@ task make_examples {
         set -u
         set -o xtrace
 
-        ln -s ~{bam} sample.bam
-        ln -s ~{bai} sample.bam.bai
+        if [[ "~{bam}" == gs://* ]]
+        then
+            # token from the VM's service account; keep it out of the xtrace log
+            set +o xtrace
+            GCS_OAUTH_TOKEN=$(curl -sf -H "Metadata-Flavor: Google" \
+                "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" \
+                | python3 -c 'import sys, json; print(json.load(sys.stdin)["access_token"])')
+            export GCS_OAUTH_TOKEN
+            set -o xtrace
+            export CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+        fi
+
+        # filter_nn only reads alignments overlapping each labeled variant, so pulling just those
+        # reads gives identical examples (checked on RUSH_001: all 509 rows x 75 columns match the
+        # full-BAM parquet) while moving <1 GB instead of the ~100 GB BAM.
+        # bcftools needs a tab-separated BED; 11train_11test.bed is space-separated.
         ln -s ~{vcf} sample.vcf.gz
         ln -s ~{vcf_idx} sample.vcf.gz.tbi
+
+        tr -s ' \t' '\t' < ~{region_bed} > region.tab.bed
+        bcftools view -H -R region.tab.bed sample.vcf.gz \
+            | awk -v OFS='\t' '{print $1, $2 - 1, $2 - 1 + length($4)}' > sites.bed
+        wc -l sites.bed
+        # ##idx## names the index explicitly; samtools 1.16 rejects -X without a region argument
+        samtools view -b -M -L sites.bed -@ ~{threads} -o sample.bam "~{bam}##idx##~{bai}"
+        samtools index -@ ~{threads} sample.bam
 
         ln -s ~{reference} reference.fa.gz
         ln -s ~{reference_idx} reference.fa.gz.fai
@@ -91,10 +122,11 @@ task make_examples {
     }
 
     runtime {
+        preemptible: preemptible
         docker: docker_image
         cpu: threads
         memory: memSizeGB + " GB"
-        disks: "local-disk " + diskSizeGB + " SSD"
+        disks: "local-disk " + diskSizeGB + " HDD"
     }
 }
 
@@ -106,9 +138,11 @@ task train {
         String model_type = "xgboost"
 
         String docker_image = "google/deepvariant:filter_nn"
-        Int threads = 16
-        Int memSizeGB = 300
-        Int diskSizeGB = 5 * round(size(train_parquet, "G")) + 50
+        # xgboost on 5 samples x ~500-750 rows: 6 s, 0.24 GB peak on 4 CPUs
+        Int threads = 4
+        Int memSizeGB = 8
+        Int diskSizeGB = ceil(size(train_parquet, "GB")) + 20
+        Int preemptible = 3
     }
 
     command <<<
@@ -130,10 +164,11 @@ task train {
     }
 
     runtime {
+        preemptible: preemptible
         docker: docker_image
         cpu: threads
         memory: memSizeGB + " GB"
-        disks: "local-disk " + diskSizeGB + " SSD"
+        disks: "local-disk " + diskSizeGB + " HDD"
     }
 }
 
