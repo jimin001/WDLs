@@ -46,11 +46,10 @@ workflow DeepSomaticFilterNN_make_examples_train {
         String model_prefix = "xgboost_somatic_filter"
         String model_type = "xgboost"
 
-        # measured on the 11train_11test vPoN2x2_NR5 set: make-examples ~1 min / ~2 GB peak per
-        # sample (reads at labeled sites are streamed from the BAM, not the whole BAM);
-        # train 6 s / 0.24 GB peak
+        # make-examples localizes the full BAM (~110 GB); filter_nn itself peaked ~2 GB per sample.
+        # train: 6 s / 0.24 GB peak
         Int make_examples_threads = 8
-        Int make_examples_memSizeGB = 16
+        Int make_examples_memSizeGB = 32
         Int train_threads = 4
         Int train_memSizeGB = 8
         Int preemptible = 3
